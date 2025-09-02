@@ -1,0 +1,7 @@
+{
+  "name": "supermart",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
