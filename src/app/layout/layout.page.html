@@ -1,0 +1,381 @@
+<ion-header class="custom-header" translucent="true">
+  <ion-toolbar class="toolbar-gradient">
+    <ion-grid>
+      <ion-row class="ion-align-items-center ion-justify-content-between">
+        <ion-col size="10" size-sm="4">
+           <ion-button fill="clear" class="mobile-header" (click)="toggleDeliveryInfo()">
+          <i class="fa-solid fa-bars"></i>
+          </ion-button>
+          <h1 class="brand-title">
+            kamatchi supermart</h1>
+        </ion-col>
+        <ion-col size="2" size-sm="8" class="ion-text-right header-right">
+          <div class="header-info">
+            <div class="delivery-text desktop-header" >
+              <span>Deliver to</span>
+              <i class="fa fa-map-marker" aria-hidden="true"></i>
+              <label>Chennai</label>
+            </div>
+            <div class="delivery-status desktop-header">
+              <span>Delivers in</span>
+              <ion-badge color="light" class="slot-badge">Slots Full</ion-badge>
+            </div>
+
+        
+            <ion-buttons class="profile-button" (click)="alertEnabler()">
+              <ion-avatar class="profile-avatar">
+               <i class="fa-solid fa-user"></i>
+              </ion-avatar>
+            </ion-buttons>
+          </div>
+        </ion-col>
+      </ion-row>
+
+        <ion-row *ngIf="isDeliveryOpen" class="mobile-delivery-panel">
+    <ion-col size="12" class="ion-text-center ion-padding custom_collap">
+      <div class="delivery-text">
+        <span>Deliver to</span>
+        <label>Chennai</label>
+      </div>
+      <div class="delivery-status">
+        <span>Delivers in</span>
+        <ion-badge color="light" class="slot-badge">Slots Full</ion-badge>
+      </div>
+    </ion-col>
+  </ion-row>
+
+    </ion-grid>
+  </ion-toolbar>
+
+   <!-- Ionic Search Bar -->
+<ion-searchbar
+  placeholder="Search 18000+ products"
+  [(ngModel)]="searchText"
+  (ionInput)="onSearchChange()"
+  showCancelButton="never"
+  animated="true"
+  color="light"
+></ion-searchbar>
+
+<!-- Suggestions List -->
+<ion-list *ngIf="filteredSuggestions.length > 0" class="suggestion-list">
+  <ion-item
+    button
+    *ngFor="let suggestion of filteredSuggestions"
+    (click)="selectSuggestion(suggestion)"
+    lines="none"
+  >
+    <ion-icon
+      name="time-outline"
+      slot="start"
+      class="suggestion-icon"
+    ></ion-icon>
+    <ion-label>{{ suggestion }}</ion-label>
+  </ion-item>
+</ion-list>
+
+<ion-toolbar class="category-toolbar">
+    <ion-segment scrollable value="Snacks">
+      <ion-segment-button *ngFor="let cat of categories" value="{{cat.name}}">
+         <i [style.background]="cat.gradient" class="fa-solid fa-utensils categoryImg"></i>
+        <ion-label class="categoryTxt">{{cat.name}}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+</ion-toolbar>
+
+</ion-header>
+
+<ion-content style="padding: 20px">
+ 
+  <ion-segment [(ngModel)]="selectedTab" class="custom-segment" mode="ios">
+  <ion-segment-button value="popular">
+    <ion-label>Popular</ion-label>
+  </ion-segment-button>
+
+  <ion-segment-button value="flash-sale">
+    <ion-label>Flash Sale</ion-label>
+  </ion-segment-button>
+
+  <ion-segment-button value="new-arrival">
+    <ion-label>New Arrival</ion-label>
+  </ion-segment-button>
+</ion-segment>
+
+
+  <!-- Product Grid -->
+ <ion-grid class="product-grid">
+  <ion-row>
+    <ion-col
+      size="6"
+      size-md="4"
+      size-lg="3"
+      *ngFor="let item of products"
+      class="product-col"
+    >
+      <ion-card class="product-card">
+        <div class="discount-badge">
+          -{{ '10%' }}%
+        </div>
+
+        <div class="like-icon" (click)="addWishlist(item)">
+          <i
+            class="fa-regular fa-heart"
+            *ngIf="!item.isLiked"
+          ></i>
+          <i
+            class="fa-solid fa-heart"
+            *ngIf="item.isLiked"
+          ></i>
+        </div>
+
+        <ion-img
+          src="../../assets/vege.jpg"
+          alt="{{ item.name }}"
+          class="product-image"
+        ></ion-img>
+
+        <ion-card-content class="product-content">
+          <h3>{{ item.name }}</h3>
+          <p class="weight">{{ item.weight }}</p>
+
+          <div class="price-row">
+            <span class="price">₹ {{ item.price }}</span>
+          
+          </div>
+
+          <div *ngIf="!item.isAdded; else quantityControl">
+            <ion-button
+              expand="block"
+              shape="round"
+              class="add-btn"
+              (click)="onAdd(item)"
+            >
+              Add
+            </ion-button>
+          </div>
+
+          <ng-template #quantityControl>
+            <div class="quantity-controls">
+              <ion-button fill="outline" size="small" (click)="onRemove(item)"
+                >-</ion-button
+              >
+              <ion-input
+                type="number"
+                [value]="getQuantity(item)"
+                readonly
+              ></ion-input>
+              <ion-button fill="outline" size="small" (click)="onAdd(item)"
+                >+</ion-button
+              >
+            </div>
+          </ng-template>
+        </ion-card-content>
+      </ion-card>
+    </ion-col>
+  </ion-row>
+</ion-grid>
+
+
+<ion-modal class="custom_modal" [isOpen]="isPanelOpen" (didDismiss)="closeCart()">
+<ng-template>
+    <ion-header translucent>
+      <ion-toolbar color="light">
+        <ion-buttons slot="start">
+          <ion-button (click)="closeCart()">
+            <ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+        <ion-title>🛒 Items in Cart</ion-title>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content>
+      <ion-list *ngIf="selectedProduct.length; else noCart">
+        <ion-item *ngFor="let item of selectedProduct">
+          <ion-thumbnail slot="start">
+            <img src="../../assets/vege.jpg" />
+          </ion-thumbnail>
+
+          <ion-label>
+            <h2>{{ item.name }}</h2>
+            <p>{{ item.weight }}</p>
+            <p><b>${{ item.price }}</b></p>
+          </ion-label>
+
+          <ion-buttons slot="end">
+            <ion-button fill="clear" (click)="onRemove(item)">-</ion-button>
+            <ion-input
+              [value]="getQuantity(item)"
+              readonly
+              style="width:40px;text-align:center"
+            ></ion-input>
+            <ion-button fill="clear" (click)="onAdd(item)">+</ion-button>
+          </ion-buttons>
+        </ion-item>
+      </ion-list>
+
+      <ng-template #noCart>
+        <ion-text color="medium" class="ion-text-center">
+          <p>No products in cart</p>
+        </ion-text>
+      </ng-template>
+    </ion-content>
+
+    <ion-footer class="ion-padding">
+      <ion-toolbar>
+        <ion-title>Total: ${{ totalPrice }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button color="success" (click)="sendmail()">Payment</ion-button>
+          <ion-button color="danger" (click)="clearCart()">Clear</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-footer>
+  </ng-template>
+</ion-modal>
+
+
+<!-- WISHLIST MODAL -->
+<ion-modal [isOpen]="isWishlistOpen" (didDismiss)="closeWishlist()">
+  <ng-template>
+    <ion-header translucent>
+      <ion-toolbar color="light">
+        <ion-buttons slot="start">
+          <ion-button (click)="closeWishlist()">
+            <ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+        <ion-title>💖 Wishlist</ion-title>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content>
+      <ion-list *ngIf="wishlist.length; else noWish">
+        <ion-item *ngFor="let item of wishlist">
+          <ion-thumbnail slot="start">
+            <img src="../../assets/vege.jpg" />
+          </ion-thumbnail>
+
+          <ion-label>
+            <h2>{{ item.name }}</h2>
+            <p>{{ item.weight }}</p>
+            <p><b>${{ item.price }}</b></p>
+          </ion-label>
+
+          <ion-buttons slot="end">
+            <ion-button color="danger" fill="clear" (click)="removeFromWishlist(item)">
+              <i class="fa-regular fa-circle-xmark"></i>
+            </ion-button>
+            <ion-button color="success" fill="solid" (click)="onAdd(item)">
+              <i class="fa-solid fa-cart-plus"></i>
+            </ion-button>
+          </ion-buttons>
+        </ion-item>
+      </ion-list>
+
+      <ng-template #noWish>
+        <ion-text color="medium" class="ion-text-center">
+          <p>No products in wishlist</p>
+        </ion-text>
+      </ng-template>
+    </ion-content>
+
+    <ion-footer class="ion-padding">
+      <ion-toolbar>
+        <ion-title>Total: ${{ totalWishlistPrice }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button color="danger" (click)="clearWishlist()">Clear</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-footer>
+  </ng-template>
+</ion-modal>
+
+<!--  PROFILE MODAL -->
+<ion-modal [isOpen]="isProfileOpen" (didDismiss)="closeProfile()">
+  <ng-template>
+    <ion-header translucent>
+      <ion-toolbar color="light">
+        <ion-buttons slot="start">
+          <ion-button (click)="closeProfile()">
+            <ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+        <ion-title>👤 Profile Information</ion-title>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding">
+      <div class="ion-text-center">
+        <ion-avatar style="margin:auto; width:100px; height:100px;">
+          <img src="../../assets/shivan.jpg" />
+        </ion-avatar>
+        <ion-button fill="clear" size="small" color="medium">
+          <i class="fa-solid fa-camera"></i>
+        </ion-button>
+      </div>
+
+      <ion-list>
+        <ion-item>
+          <ion-label position="floating">Name</ion-label>
+          <ion-input [(ngModel)]="userName"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Email</ion-label>
+          <ion-input [(ngModel)]="email"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Phone</ion-label>
+          <ion-input [(ngModel)]="phoneNumber"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Delivery Address</ion-label>
+          <ion-input [(ngModel)]="address"></ion-input>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+
+    <ion-footer class="ion-padding">
+      <ion-toolbar>
+        <ion-buttons slot="end">
+          <ion-button color="success" (click)="saveUserData()">Save</ion-button>
+          <ion-button color="danger" (click)="clearProfile()">Clear</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-footer>
+  </ng-template>
+</ion-modal>
+
+  <div class="overlay" [class.show]="isPanelOpen" (click)="togglePanel()"></div>
+</ion-content>
+
+
+<!-- Bottom Tabs -->
+<ion-footer class="custom-footer">
+  <ion-tab-bar slot="bottom">
+    <ion-tab-button tab="wishlist"  (click)="openWishlist();setActive('Wishlist')">
+      <i class="fa-solid fa-heart footerIconSize"></i>
+      <ion-label class="footerLabel">Wishlist</ion-label>
+      <ion-badge color="danger"  class="badgeFooter">{{ wishlist.length }}</ion-badge>
+    </ion-tab-button>
+
+    <ion-tab-button tab="home">
+      <i class="fa-solid fa-house footerIconSize"></i>
+      <ion-label class="footerLabel">Home</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="cart"  (click)="togglePanel();this.setActive('Cart')">
+      <i class="fa-solid fa-cart-shopping footerIconSize"></i>
+      <ion-label class="footerLabel">Cart</ion-label>
+      <ion-badge color="danger" class="badgeFooter">{{ selectedProduct.length }}</ion-badge>
+    </ion-tab-button>
+
+    <ion-tab-button tab="profile" (click)="openProfile();setActive('Profile')">
+      <i class="fa-solid fa-user footerIconSize"></i>
+      <ion-label class="footerLabel">Profile</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
+</ion-footer>
+

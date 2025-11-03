@@ -5,15 +5,16 @@ import { AppComponent } from './app/app.component';
 import { provideRouter } from '@angular/router';
 import { routes } from './app/app.routes';
 import { provideHttpClient } from '@angular/common/http';
+import { provideIonicAngular } from '@ionic/angular/standalone'; 
 
 if (environment.production) {
   enableProdMode();
 }
+
 bootstrapApplication(AppComponent, {
   providers: [
+    provideIonicAngular(), 
     provideHttpClient(),
-    provideRouter(routes),],
+    provideRouter(routes),
+  ],
 });
-
-
-
