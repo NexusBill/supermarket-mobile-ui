@@ -7,6 +7,7 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
 import { HttpClient,HttpClientModule } from '@angular/common/http';
+import {CdkDrag} from '@angular/cdk/drag-drop';
 // nodemailer is a Node.js-only module and cannot be used in browser/Angular components.
 // Move email-sending logic to a backend service (e.g. Node/Express) and call it via HTTP.
 // import nodemailer from "nodemailer";
@@ -40,6 +41,7 @@ imports: [
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    CdkDrag
     ]})
 export class HomePage {
   searchText = '';

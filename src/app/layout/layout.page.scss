@@ -79,6 +79,7 @@ ion-searchbar .searchbar-input-container .searchbar-input{
 /* Categories */
 .category-toolbar {
   --background: #fff;
+  overflow-x: auto;
   ion-segment-button {
     --color: #fff;
     --color-checked: #fff;

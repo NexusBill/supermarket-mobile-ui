@@ -3,8 +3,8 @@
   <div class="header-container">
     <!-- Brand Name -->
     <div class="brand-section">
-      <ion-title class="brand-title">Kamatchi SuperMart</ion-title>
-    </div>
+      <div class="brand-title">Kamatchi SuperMart</div>
+            </div>
 
     <!-- Delivery Location & User Profile -->
     <div class="actions-section">
@@ -50,14 +50,12 @@
         <span class="text">{{ suggestion }}</span>
       </div>
     </div>
-  </div>
+</div>
 
 
 </ion-header>
 
-
-<ion-content style="padding: 20px;">
-  <!-- Categories -->
+    <!-- Categories -->
   <div class="content">
 
     <div class="categories-scroll">
@@ -70,6 +68,10 @@
       </div>
     </div>
   </div>
+
+
+<ion-content style="padding: 20px;overflow-y: auto;--background:fff" fullscreen="true">
+
 <div class="bg" *ngIf="showAlert">
     <div class="backdrop" (click)="alertEnabler()"></div>
     <!-- Alert Container -->
@@ -117,7 +119,7 @@
           <div class="count" style="width: 70%;display: flex;gap: 2px;" *ngIf="item.isAdded">
             <button class="decrease" (click)="onRemove(item)">-</button>
             <input type="number" class="quantity" [value]="getQuantity(item)"
-              style="width: 60%;background-color: aliceblue;border: 1px solid gray;border-radius: 4px;" />
+              style="width: 60%;background-color: aliceblue;border: 1px solid gray;border-radius: 4px;color:#000" />
             <button class="increase" (click)="onAdd(item)">+</button>
           </div>
         </div>
@@ -126,11 +128,7 @@
   </div>
 
 
-  <div    class="footer draggable"
-  (mousedown)="startDrag($event)"
-  (mousemove)="onDrag($event)"
-  (mouseup)="stopDrag()"
-  (mouseleave)="stopDrag()">
+  <div    class="footer draggable" cdkDrag>
  
       <button class="nav-btn" [ngClass]="{ 'active': isWishlist }" (click)="togglePanel();setActive('Wishlist')">
         <div class="icon-wrapper">
@@ -177,6 +175,15 @@
     
   </div>
 
+      <!-- Backdrop -->
+
+    <!-- Alert Container -->
+   
+
+</ion-content>
+
+
+
   <!-- SIDE PANEL (slides in/out) -->
   <div class="side-panel" [class.open]="isPanelOpen">
     <div class="panel-header">
@@ -193,7 +200,7 @@
          <h4 style="margin: 0px 0px 0px 10px;">Profile Information</h4>
       </div>
     </div>
-    <div class="cart-list" *ngIf="isCart">
+    <div class="cart-list" style="flex: 1;overflow: auto;" *ngIf="isCart">
       <div class="cart-section">
         <div *ngFor="let item of selectedProduct" class="cart-item">
 
@@ -317,13 +324,6 @@
 
   <div class="overlay" [class.show]="isPanelOpen" (click)="togglePanel()"></div>
 
-
-      <!-- Backdrop -->
-
-    <!-- Alert Container -->
-   
-
-</ion-content>
 
 <!-- <footer class="custom-footer">
  
