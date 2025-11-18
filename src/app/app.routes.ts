@@ -1,4 +1,4 @@
-import { LayoutComponent } from './layout/layout.page';
+import { LayoutComponent  } from './layout/layout.page';
 import { Routes } from '@angular/router';
 import { HomePage } from './home/home.page';
 

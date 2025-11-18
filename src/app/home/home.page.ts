@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, ViewChild, TemplateRef } from '@angular/core';
+import { ModalController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
@@ -44,6 +45,10 @@ imports: [
     CdkDrag
     ]})
 export class HomePage {
+
+  @ViewChild('loginSheet') loginSheet!: TemplateRef<any>;
+
+
   searchText = '';
 
   categories: Category[] = [
@@ -148,6 +153,11 @@ ngOnInit() {
   this.email=localStorage.getItem("emai")||'';
   this.address=localStorage.getItem("address")||'';
   this.phoneNumber=localStorage.getItem("phoneNumber")||'';
+
+   setTimeout(() => {
+      this.openLoginSheet();
+    }, 300); 
+    
 }
 
 
@@ -316,7 +326,8 @@ selectSuggestion(suggestion: string) {
   this.searchText = suggestion;
   this.filteredSuggestions = [];
 }
-constructor(private http: HttpClient) {}
+constructor(private http: HttpClient,private modalCtrl: ModalController) {}
+
 addWishlist(item: any){
   debugger
   if (!item.isLiked) {
@@ -371,4 +382,18 @@ getQuantity(item: any): number {
     // You could set searchText or filter state
     this.searchText = cat.name;
   }
+
+
+ isLoginOpen = false;
+  authMode: 'login' | 'signup' = 'login';
+
+  openLoginSheet() {
+    this.authMode = 'login';
+    this.isLoginOpen = true;
+  }
+
+  skip() {
+    this.isLoginOpen = false;
+  }
+
 }

@@ -1687,3 +1687,55 @@ ion-item:hover {
     }
   }
 }
+
+// Login css
+
+
+
+.bottom-sheet-modal {
+  --border-radius: 20px 20px 0 0;
+}
+
+.sheet-container {
+  padding: 20px;
+}
+
+ion-segment-button {
+  margin-bottom: 20px;
+  
+
+  --indicator-color: #8B2A8B  !important;     /* Bottom line color when active */
+  --color-checked: #8B2A8B  !important;       /* Active text color */
+  --color: #888888;               /* Inactive text color */
+
+  --indicator-height: 3px;
+}
+
+.form-box {
+  padding-top: 10px;
+}
+
+.mt-2 {
+  margin-top: 12px;
+}
+
+.mt-3 {
+  margin-top: 20px;
+}
+
+.skip-btn {
+  text-align: center;
+  margin-top: 25px;
+  font-weight: bold;
+  color: #8B2A8B  !important;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.btn-signUp{
+   --background: #8B2A8B ;
+  --background-hover: #8B2A8B;
+  --background-activated: #8B2A8B;
+  --border-radius: 10px;
+  --color: white;
+}
