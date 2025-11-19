@@ -136,7 +136,117 @@ onDrag(event: MouseEvent) {
   footer.style.bottom = 'auto';
 }
 
+// add near other methods in the HomePage class
 
+// helper: ensure Razorpay script loaded (you already have this but keep it)
+private loadRazorpayScript(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    // avoid adding multiple scripts
+    if ((<any>window).Razorpay) {
+      resolve();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('Razorpay script load error'));
+    document.body.appendChild(script);
+  });
+}
+
+/**
+ * Initiate payment.
+ * Tries to call backend (/api/create-order) if present. Fallbacks to client-only checkout.
+ * - this.totalPrice should be in INR (number). We convert to paise.
+ */
+async pay() {
+  const amountInPaise = Math.round(this.totalPrice * 100);
+
+  if (amountInPaise <= 0) {
+    alert("Cart is empty!");
+    return;
+  }
+
+  // 1️⃣ CREATE ORDER FROM BACKEND
+  this.http.post("https://supermartspring.vercel.app/create-order", {
+    amount: amountInPaise
+  }).subscribe((order: any) => {
+
+    const options: any = {
+      key: "rzp_test_Rhe1D8p5Mgfh6G",
+      amount: order.amount,
+      currency: order.currency,
+      name: "My Grocery Store",
+      description: "Order Payment",
+      order_id: order.id,
+
+      handler: (response: any) => {
+        console.log("Payment Success:", response);
+
+        // 2️⃣ VERIFY PAYMENT AFTER SUCCESS
+        this.verifyPayment(response);
+      },
+
+      prefill: {
+        name: this.userName,
+        email: this.email,
+        contact: this.phoneNumber
+      },
+
+      theme: { color: "#3399cc" }
+    };
+
+    const rzp = new (window as any).Razorpay(options);
+
+    rzp.on("payment.failed", (err: any) => {
+      alert("Payment Failed!");
+      console.error(err);
+    });
+
+    rzp.open();
+  });
+}
+verifyPayment(response: any) {
+  this.http.post("https://supermartspring.vercel.app/verify-payment", {
+    razorpay_order_id: response.razorpay_order_id,
+    razorpay_payment_id: response.razorpay_payment_id,
+    razorpay_signature: response.razorpay_signature
+  }).subscribe((res: any) => {
+
+    if (res.success) {
+      alert("Payment Verified Successfully!");
+
+      // your custom logic
+      this.sendmail();          
+      this.clearCart();         
+      this.isPanelOpen = false; 
+    } else {
+      alert("Payment verification failed");
+    }
+  });
+}
+
+
+
+//  private loadRazorpayScript(): Promise<void> {
+//          return new Promise((resolve, reject) => {
+//            const script = document.createElement('script');
+//            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+//            script.onload = () => resolve();
+//            script.onerror = () => reject();
+//            document.body.appendChild(script);
+//          });
+//        }
+      
+
+       call(){
+         this.loadRazorpayScript().then((response:any) => {
+
+          console.log('Razorpay script loaded successfully.'+response);
+        }).catch((error:any) => {
+          console.error('Failed to load Razorpay script.', error);
+               });
+       }
 // stopDrag() {
 //   this.isDragging = false;
 //   const footer = document.querySelector('.footer') as HTMLElement;
