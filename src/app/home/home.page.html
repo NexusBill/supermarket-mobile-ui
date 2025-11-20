@@ -14,7 +14,8 @@
         <div class="delivery-details">
           <span class="deliver-to">Deliver to</span>
           <div class="location-selector">
-            <span class="location-name">Chennai</span>
+             <p *ngIf="city">Pincode : {{ postalCode }}</p>
+            <span class="location-name"> {{ city }}</span>
             <ion-icon name="chevron-down-outline" class="dropdown-icon"></ion-icon>
           </div>
         </div>
@@ -45,9 +46,9 @@
     <!-- Suggestion Box -->
     <div class="suggestion-box" *ngIf="filteredSuggestions.length > 0">
       <div class="suggestion-item" *ngFor="let suggestion of filteredSuggestions"
-        (click)="selectSuggestion(suggestion)">
+        (click)="selectSuggestion(suggestion.name)">
         <i class="fa-solid fa-clock-rotate-left icon"></i>
-        <span class="text">{{ suggestion }}</span>
+        <span class="text">{{ suggestion.name }}</span>
       </div>
     </div>
 </div>
@@ -59,10 +60,10 @@
   <div class="content">
 
     <div class="categories-scroll">
-      <div class="category" *ngFor="let cat of categories">
-        <div class="cat-displayer">
+      <div class="category" *ngFor="let cat of suggestions">
+        <div class="cat-displayer" (click)="selectSuggestion(cat)">
           <img src="../../assets/shapes.svg" />
-          <p>{{cat.name}}</p>
+          <p>{{cat}}</p>
         </div>
 
       </div>
@@ -106,11 +107,11 @@
       <img src="../../assets/vege.jpg" alt="product" class="product-image" />
 
       <div class="product-content">
-        <h3>{{ item.name }}</h3>
-        <p class="weight">{{ item.weight }}</p>
+        <h3 style="color: olive;">{{ item.name }}</h3>
+        <p class="weight">{{ item.UnitDesc }}</p>
 
         <div class="price-row">
-          <span class="price" style="width: 30%;">${{ item.price }}</span>
+          <span class="price" style="width: 30%;">₹ {{ item.MRP }}</span>
 
           <div class="add-btn" style="width: 70%;" *ngIf="!item.isAdded">
             <button class="add-button" (click)="onAdd(item)">Add</button>

@@ -9,6 +9,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
 import { HttpClient,HttpClientModule } from '@angular/common/http';
 import {CdkDrag} from '@angular/cdk/drag-drop';
+import { Geolocation } from '@capacitor/geolocation';
 // nodemailer is a Node.js-only module and cannot be used in browser/Angular components.
 // Move email-sending logic to a backend service (e.g. Node/Express) and call it via HTTP.
 // import nodemailer from "nodemailer";
@@ -20,21 +21,30 @@ interface Category {
 }
 
 interface Product {
-  id: string;
+   id?: string;
+  // core product fields
   name: string;
-  category: string;
-  quantity: number;
-  weight: string;
-  price: number;
-  image: string;
-  isAdded: boolean;
-  isLiked: boolean;
+  Category?: string;          
+  QuantityOnHand?: number;     
+  UnitDesc?: string;           
+  RetailPrice?: number;        
+  SalePrice?: number;         
+  MRP?: number;              
+  UnitPrice?: number;          
+  EANCode?: string;          
+  weight?: string;            
+  price: number;              
+  image?: string;
+  quantity?: number;         
+  isAdded: boolean;            
+  isLiked: boolean;  
 }
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
+  providers: [HttpClient],
 imports: [
     CommonModule,
     FormsModule,       // <-- required for ngModel
@@ -50,7 +60,11 @@ export class HomePage {
 
 
   searchText = '';
-
+ latitude: number | null = null;
+  longitude: number | null = null;
+  city: string | null = null;
+  fullAddress: string | null = null;
+  errorMsg: string | null = null;
   categories: Category[] = [
     { id: 'snacks', name: 'Snacks', icon: 'https://via.placeholder.com/64?text=Sn' },
     { id: 'breakfast', name: 'Breakfast', icon: 'https://via.placeholder.com/64?text=Bf' },
@@ -79,18 +93,7 @@ export class HomePage {
     { id: 'veg', name: 'Vegetables', icon: 'https://via.placeholder.com/64?text=Vg' },
   ];
 
-  products: Product[] = [
-    { id: 'p1', name: 'Mushroom Sauce', category: 'sauce', weight: '24oz', price: 8.92, image: 'https://via.placeholder.com/240x200?text=Mushroom',isAdded:false  ,isLiked:false,quantity:0},
-    { id: 'p2', name: 'Ghetto Gastro', category: 'canned', weight: '1 Kg', price: 20.72, image: 'https://via.placeholder.com/240x200?text=Ghetto',isAdded:false  ,isLiked:false,quantity:0},
-    { id: 'p3', name: 'Seasoned Avocado', category: 'fruits', weight: '0.5 Kg', price: 4.29, image: 'https://via.placeholder.com/240x200?text=Avocado',isAdded:false  ,isLiked:false,quantity:0},
-    { id: 'p4', name: 'Organic Bananas', category: 'fruits', weight: '1 Kg', price: 1.99, image: 'https://via.placeholder.com/240x200?text=Bananas',isAdded:false  ,isLiked:false,quantity:0},
-    { id: 'p5', name: 'Bread', category: 'breakfast', weight: '500g', price: 2.49, image: 'https://via.placeholder.com/240x200?text=Bread',isAdded:false  ,isLiked:false,quantity:0},
-    { id: 'p6', name: 'Eggs', category: 'breakfast', weight: '12 pcs', price: 3.19, image: 'https://via.placeholder.com/240x200?text=Eggs',isAdded:false  ,isLiked:false,quantity:0},
-    { id: 'p7', name: 'Orange Juice', category: 'breakfast', weight: '1 L', price: 3.99, image: 'https://via.placeholder.com/240x200?text=Juice',isAdded:false  ,isLiked:false,quantity:0},
-    { id: 'p8', name: 'Potato Chips', category: 'snacks', weight: '200g', price: 2.99, image: 'https://via.placeholder.com/240x200?text=Chips',isAdded:false  ,isLiked:false,quantity:0},
-    { id: 'p9', name: 'Chocolate Bar', category: 'snacks', weight: '100g', price: 1.49, image: 'https://via.placeholder.com/240x200?text=Chocolate',isAdded:false  ,isLiked:false,quantity:0},
-    { id: 'p10', name: 'Mixed Nuts', category: 'snacks', weight: '150g', price: 5.49, image: 'https://via.placeholder.com/240x200?text=Nuts',isAdded:false  ,isLiked:false,quantity:0},
-  ];
+ 
 selectedProduct: Product [] = [];
 wishlist: Product [] = [];
 totalItemCount = 0;
@@ -106,7 +109,13 @@ resetStates(){
   this.isCart = false;
   this.isWishlist = false;
 }
-
+products: Product[] = [];
+getProducts(){
+  this.http.get<Product[]>("https://supermartspring.vercel.app/products").subscribe((data:any)=>{
+    this.products=data;
+    this.productsBackup=[...this.products];
+  });
+}
 togglePanel() {
   debugger
   this.isPanelOpen = !this.isPanelOpen;
@@ -176,10 +185,12 @@ async pay() {
       key: "rzp_test_Rhe1D8p5Mgfh6G",
       amount: order.amount,
       currency: order.currency,
-      name: "My Grocery Store",
+      name: "Kaamatchi SuperMart",
       description: "Order Payment",
       order_id: order.id,
-
+upi: {
+  flow: "intent"
+},
       handler: (response: any) => {
         console.log("Payment Success:", response);
 
@@ -258,6 +269,8 @@ verifyPayment(response: any) {
 
 ngOnInit() {
  this.resetStates();
+ this.getProducts();
+ this.getLocation();
  this.isHome = true;
  this.userName=localStorage.getItem("userName")||'';
   this.email=localStorage.getItem("emai")||'';
@@ -403,40 +416,149 @@ user:{
   email: ' kahjhj@gail.com'
 }
 suggestions: string[] = [
-  'Milk',
-  'Mango',
-  'Maggi',
-  'Bread',
-  'Butter',
-  'Basmati Rice',
-  'Banana',
-  'Biscuits',
-  'Blueberry',
-  'Broccoli'
+  'Dairy','Fruits','Instant Food','Bakery','Grains','Snacks','Vegetables','Meat','Daily Needs','Pulses','Beverages','Condiments','Breakfast','General'
 ];
 
-filteredSuggestions: string[] = [];
+filteredSuggestions: Product[] = [];
+async getLocation() {
+  const pos = await Geolocation.getCurrentPosition();
+  this.latitude = pos.coords.latitude;
+  this.longitude = pos.coords.longitude;
+
+  this.getCityByAPI(this.latitude, this.longitude);
+}
+postalCode: string | null = null;
+getCityByAPI(lat: number, lng: number) {
+ //`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`;
+  const url =  `https://us1.locationiq.com/v1/reverse?key=pk.c7e493dd7d985c4d9562498de05c0711&lat=${lat}&lon=${lng}&format=json&zoom=18`;
+//https://us1.locationiq.com/v1/reverse?key=pk.c7e493dd7d985c4d9562498de05c0711&lat=9.941420658997988&lon=77.96932102307461&format=json
+  //const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`;
+
+  this.http.get(url).subscribe((data: any) => {
+    debugger
+   
+    let address = data.address || {};
+    this.city =  address.town || address.city || address.village || address.locality ||address.county || address.state_district;
+    this.fullAddress = data.display_name || '';
+    this.postalCode = address.postcode || null;
+
+    console.log("City:", this.city);
+    console.log("Address:", this.fullAddress);
+  });
+}
+
 
 onSearchChange() {
+  debugger;
   const value = this.searchText.toLowerCase().trim();
-  if (value.length === 0) {
-    this.filteredSuggestions = [];
-  } else {
-    this.filteredSuggestions = this.suggestions.filter(item =>
-      item.toLowerCase().includes(value)
-    );
+ 
+
+  if (value === '') {
+    this.filteredSuggestions = [];  
+    this.products = [...this.productsBackup];
+  }else{
+      this.filteredSuggestions = this.products.filter(p =>
+    p.Category?.toLowerCase().includes(value.toLowerCase()) || p.name?.toLowerCase().includes(value.toLowerCase())
+  );
+    this.filteredSuggestions = this.filteredSuggestions.slice(0, 5);
   }
 }
    showAlert = false;
    alertEnabler() {
      this.showAlert = this.showAlert ? false : true;
    }
-
+productsBackup: Product[] = [];
 selectSuggestion(suggestion: string) {
-  this.searchText = suggestion;
+  debugger;
   this.filteredSuggestions = [];
+  if(this.productsBackup.length===0){
+    this.productsBackup = [...this.products];
+  }else{
+    this.products = [...this.productsBackup];
+  }
+  this.products = this.products.filter(p =>
+    p.Category?.toLowerCase().includes(suggestion.toLowerCase()) ||
+    p.name?.toLowerCase().includes(suggestion.toLowerCase())
+  );
 }
 constructor(private http: HttpClient,private modalCtrl: ModalController) {}
+// async getLocation() {
+//   this.errorMsg = null;
+
+//   try {
+//     // Request permission
+//     const perm = await Geolocation.requestPermissions();
+//     console.log("Permission:", perm);
+
+//     // Get actual device GPS
+//     const pos = await Geolocation.getCurrentPosition({
+//       enableHighAccuracy: true,
+//       timeout: 15000
+//     });
+
+//     this.latitude = pos.coords.latitude;
+//     this.longitude = pos.coords.longitude;
+
+//     console.log("Device GPS:", this.latitude, this.longitude);
+
+//     await this.getCityFromCoords(this.latitude, this.longitude);
+
+//   } catch (error) {
+//     console.error("GPS ERROR:", error);
+//     this.errorMsg = "Failed to get location";
+//   }
+// }
+
+
+// getWebAddress(lat: number, lng: number) {
+//   this.http.get(
+//     `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+//   ).subscribe((data: any) => {
+//     this.city = data.address.city || data.address.town || data.address.village;
+//     this.fullAddress = data.display_name;
+
+//     console.log("Web Address:", this.fullAddress);
+//     console.log("Web City:", this.city);
+//   });
+// }
+
+//  async getCityFromCoords(lat: number, lng: number) {
+//   try {
+//     const options: NativeGeocoderOptions = {
+//       useLocale: true,
+//       maxResults: 1
+//     };
+
+//     const results = await this.nativeGeocoder.reverseGeocode(lat, lng, options);
+
+//     if (results.length > 0) {
+//       const r = results[0];
+
+//       this.city =
+//         r.locality ||
+//         r.subAdministrativeArea ||
+//         r.administrativeArea ||
+//         'Unknown';
+
+//       this.fullAddress = Object.values({
+//         thoroughfare: r.thoroughfare,
+//         subLocality: r.subLocality,
+//         locality: r.locality,
+//         adminArea: r.administrativeArea,
+//         postalCode: r.postalCode,
+//         country: r.countryName
+//       })
+//         .filter(x => !!x)
+//         .join(', ');
+
+//       console.log("Address:", this.fullAddress);
+//       console.log("City:", this.city);
+//     }
+//   } catch (e) {
+//     console.error("Reverse geocode failed:", e);
+//     this.errorMsg = "Failed to reverse geocode";
+//   }
+// }
 
 addWishlist(item: any){
   debugger
@@ -456,7 +578,7 @@ addWishlist(item: any){
       return this.products;
     }
     return this.products.filter(p =>
-      p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)
+      p.name.toLowerCase().includes(q) || p.Category?.toLowerCase().includes(q)
     );
   }
 onAdd(item: any) {
