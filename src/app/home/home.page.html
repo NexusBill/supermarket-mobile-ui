@@ -3,8 +3,8 @@
   <div class="header-container">
     <!-- Brand Name -->
     <div class="brand-section">
-      <div class="brand-title">Kamatchi SuperMart</div>
-            </div>
+      <div class="brand-title">Kamatchi supermart</div>
+    </div>
 
     <!-- Delivery Location & User Profile -->
     <div class="actions-section">
@@ -14,9 +14,9 @@
         <div class="delivery-details">
           <span class="deliver-to">Deliver to</span>
           <div class="location-selector">
-             <p *ngIf="city">Pincode : {{ postalCode }}</p>
             <span class="location-name"> {{ city }}</span>
-            <ion-icon name="chevron-down-outline" class="dropdown-icon"></ion-icon>
+            <span class="location-name" *ngIf="city">,{{ postalCode }}</span>
+            
           </div>
         </div>
       </div>
@@ -30,64 +30,103 @@
       <!-- Profile Icon -->
       <ion-buttons class="profile-button" (click)="alertEnabler()">
         <ion-avatar class="profile-avatar">
-
           <img src="../../assets/bell-solid-full.svg" class="profile-icon" />
         </ion-avatar>
       </ion-buttons>
     </div>
+
+    <div class="mobile-actions-section">
+      <div class="delivery-info">
+        <i class="fa-solid fa-location-dot"></i>
+        <div class="delivery-details">
+          <div class="location-selector">
+            <span class="location-name"> {{ city }}</span>
+            <span class="location-name" *ngIf="city">,{{ postalCode }}</span>
+            <ion-icon
+              name="chevron-down-outline"
+              class="dropdown-icon"
+            ></ion-icon>
+          </div>
+        </div>
+      </div>
+
+      <!-- Delivery Status Badge -->
+      <div class="delivery-status">
+        <i class="fa-solid fa-truck"></i>
+        <span class="status-badge">Slots Full</span>
+      </div>
+    </div>
   </div>
 
   <!-- Search Bar -->
+  <div class="search-containerWrap">
   <div class="search-container">
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Search 18000+ products"
+      [(ngModel)]="searchText"
+      (input)="onSearchChange()"
+    />
+
     <i class="fa-solid fa-magnifying-glass search-icon"></i>
-    <input type="text" class="search-input" placeholder="Search 18000+ products" [(ngModel)]="searchText"
-      (input)="onSearchChange()" />
 
     <!-- Suggestion Box -->
     <div class="suggestion-box" *ngIf="filteredSuggestions.length > 0">
-      <div class="suggestion-item" *ngFor="let suggestion of filteredSuggestions"
-        (click)="selectSuggestion(suggestion.name)">
+      <div
+        class="suggestion-item"
+        *ngFor="let suggestion of filteredSuggestions"
+        (click)="selectSuggestion(suggestion.name)"
+      >
         <i class="fa-solid fa-clock-rotate-left icon"></i>
         <span class="text">{{ suggestion.name }}</span>
       </div>
     </div>
-</div>
-
-
+  </div>
+  </div>
 </ion-header>
 
-    <!-- Categories -->
-  <div class="content">
-
-    <div class="categories-scroll">
-      <div class="category" *ngFor="let cat of suggestions">
-        <div class="cat-displayer" (click)="selectSuggestion(cat)">
-          <img src="../../assets/shapes.svg" />
-          <p>{{cat}}</p>
-        </div>
-
+<!-- Categories -->
+<div class="content">
+  <div class="categories-scroll">
+    <div class="category" *ngFor="let cat of suggestions">
+      <div class="cat-displayer" (click)="selectSuggestion(cat)">
+        <img src="../../assets/shapes.svg" />
+        <p>{{cat}}</p>
       </div>
     </div>
   </div>
+</div>
 
-
-<ion-content style="padding: 20px;overflow-y: auto;--background:fff" fullscreen="true">
-
-<div class="bg" *ngIf="showAlert">
+<ion-content
+  class="contentClass"
+  style="overflow-y: auto !important; --background: fff !important"
+  fullscreen="true"
+>
+  <div class="bg" *ngIf="showAlert">
     <div class="backdrop" (click)="alertEnabler()"></div>
     <!-- Alert Container -->
-  <div class="alert-container" id="alertContainer" >
-        <div class="alert-dialog" style="position: absolute;top:30%; display: block;height: 18%;width: 80%;">
-            <div class="alert-title">
-                <h2>Alert!</h2>
-            </div>
-            <div class="alert-buttons">
-                <button class="alert-button" (click)="alertEnabler()" >Cancel</button>
-                <button class="alert-button"  (click)="alertEnabler()"  >OK</button>
-            </div>
+    <div class="alert-container" id="alertContainer">
+      <div
+        class="alert-dialog"
+        style="
+          position: absolute;
+          top: 30%;
+          display: block;
+          height: 18%;
+          width: 80%;
+        "
+      >
+        <div class="alert-title">
+          <h2>Alert!</h2>
         </div>
+        <div class="alert-buttons">
+          <button class="alert-button" (click)="alertEnabler()">Cancel</button>
+          <button class="alert-button" (click)="alertEnabler()">OK</button>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
 
   <!-- Section Tabs -->
   <div class="tabs">
@@ -96,31 +135,52 @@
     <span>New Arrival</span>
   </div>
 
-
   <div class="product-grid">
     <div *ngFor="let item of products" class="product-card">
       <div class="like" (click)="addWishlist(item)">
-        <i class="fa-regular fa-heart" *ngIf="!item.isLiked" style="color: #6b1b6c;"></i>
-        <i class="fa-solid fa-heart" *ngIf="item.isLiked" style="color: #e64e33;"></i>
+        <i
+          class="fa-regular fa-heart"
+          *ngIf="!item.isLiked"
+          style="color: #6b1b6c"
+        ></i>
+        <i
+          class="fa-solid fa-heart"
+          *ngIf="item.isLiked"
+          style="color: #e64e33"
+        ></i>
       </div>
 
       <img src="../../assets/vege.jpg" alt="product" class="product-image" />
 
       <div class="product-content">
-        <h3 style="color: olive;">{{ item.name }}</h3>
+        <h3 style="color: olive">{{ item.name }}</h3>
         <p class="weight">{{ item.UnitDesc }}</p>
 
         <div class="price-row">
-          <span class="price" style="width: 30%;">₹ {{ item.MRP }}</span>
+          <span class="price" style="width: 30%">₹ {{ item.MRP }}</span>
 
-          <div class="add-btn" style="width: 70%;" *ngIf="!item.isAdded">
+          <div class="add-btn" style="width: 70%" *ngIf="!item.isAdded">
             <button class="add-button" (click)="onAdd(item)">Add</button>
           </div>
 
-          <div class="count" style="width: 70%;display: flex;gap: 2px;" *ngIf="item.isAdded">
+          <div
+            class="count"
+            style="width: 70%; display: flex; gap: 2px"
+            *ngIf="item.isAdded"
+          >
             <button class="decrease" (click)="onRemove(item)">-</button>
-            <input type="number" class="quantity" [value]="getQuantity(item)"
-              style="width: 60%;background-color: aliceblue;border: 1px solid gray;border-radius: 4px;color:#000" />
+            <input
+              type="number"
+              class="quantity"
+              [value]="getQuantity(item)"
+              style="
+                width: 60%;
+                background-color: aliceblue;
+                border: 1px solid gray;
+                border-radius: 4px;
+                color: #000;
+              "
+            />
             <button class="increase" (click)="onAdd(item)">+</button>
           </div>
         </div>
@@ -128,203 +188,271 @@
     </div>
   </div>
 
+  <div class="footer draggable" cdkDrag>
+    <button
+      class="nav-btn"
+      [ngClass]="{ 'active': isWishlist }"
+      (click)="togglePanel();setActive('Wishlist')"
+    >
+      <div class="icon-wrapper">
+        <img src="../../assets/heart-solid-full.svg" class="profile-icon" />
+      </div>
+      <span class="nav-label">Wishlist</span>
+      <span class="badge">{{ wishlist.length }}</span>
+    </button>
 
-  <div    class="footer draggable" cdkDrag>
- 
-      <button class="nav-btn" [ngClass]="{ 'active': isWishlist }" (click)="togglePanel();setActive('Wishlist')">
-        <div class="icon-wrapper">
-          <img src="../../assets/heart-solid-full.svg" class="profile-icon" />
-        </div>
-        <span class="nav-label">Wishlist</span>
-        <span class="badge">{{ wishlist.length }}</span>
-      </button>
+    <!-- Home -->
+    <button
+      class="nav-btn"
+      [ngClass]="{ 'active': isHome }"
+      (click)="setActive('Home')"
+    >
+      <div class="icon-wrapper">
+        <img src="../../assets/house-solid-full.svg" class="profile-icon" />
+      </div>
+      <span class="nav-label">Home</span>
+    </button>
 
-      <!-- Home -->
-      <button class="nav-btn" [ngClass]="{ 'active': isHome }" (click)="setActive('Home')">
-        <div class="icon-wrapper">
-          <img src="../../assets/house-solid-full.svg" class="profile-icon" />
-        </div>
-        <span class="nav-label">Home</span>
-      </button>
+    <!-- Profile -->
+    <button
+      class="nav-btn"
+      [ngClass]="{ 'active': isProfile }"
+      (click)="togglePanel();setActive('Profile')"
+    >
+      <div class="icon-wrapper">
+        <img src="../../assets/user-solid-full.svg" class="profile-icon" />
+      </div>
+      <span class="nav-label">Profile</span>
+    </button>
+    <!-- Cart -->
+    <button
+      class="nav-btn"
+      [ngClass]="{ 'active': isCart }"
+      (click)="togglePanel();this.setActive('Cart')"
+    >
+      <div class="icon-wrapper">
+        <img
+          src="../../assets/cart-shopping-solid-full.svg"
+          class="profile-icon"
+        />
+        <span class="badge">{{ selectedProduct.length }}</span>
+      </div>
+      <span class="nav-label">Cart</span>
+    </button>
 
-      <!-- Profile -->
-      <button class="nav-btn" [ngClass]="{ 'active': isProfile }" (click)="togglePanel();setActive('Profile')">
-        <div class="icon-wrapper">
-          <img src="../../assets/user-solid-full.svg" class="profile-icon" />
-        </div>
-        <span class="nav-label">Profile</span>
-      </button>
-      <!-- Cart -->
-      <button class="nav-btn" [ngClass]="{ 'active': isCart }" (click)="togglePanel();this.setActive('Cart')">
-        <div class="icon-wrapper">
-          <img src="../../assets/cart-shopping-solid-full.svg" class="profile-icon" />
-          <span class="badge">{{ selectedProduct.length }}</span>
-        </div>
-        <span class="nav-label">Cart</span>
-      </button>
-
-
-      <!-- <button class="nav-btn" onclick="setActive(this)">
+    <!-- <button class="nav-btn" onclick="setActive(this)">
         <div class="icon-wrapper">
           <img src="../../assets/credit-card-solid-full.svg" class="profile-icon" />
         </div>
         <span class="nav-label">Categories</span>
       </button> -->
-      <!-- Wishlist -->
-    
-
-    
+    <!-- Wishlist -->
   </div>
 
-      <!-- Backdrop -->
+  <!-- Backdrop -->
 
-    <!-- Alert Container -->
-   
-
+  <!-- Alert Container -->
 </ion-content>
 
-
-
-  <!-- SIDE PANEL (slides in/out) -->
-  <div class="side-panel" [class.open]="isPanelOpen">
-    <div class="panel-header">
-      <div class="panel-head" *ngIf="isCart">
-        <button class="close-btn" (click)="setActive('Home');togglePanel(); "> <i class="fa-solid fa-chevron-left"></i></button>
-         <h4 style="margin: 0px 0px 0px 10px;">Items in Cart</h4>
-      </div>
-      <div class="panel-head" *ngIf="isWishlist">
-       <button class="close-btn" (click)="setActive('Home');togglePanel(); ;"><i class="fa-solid fa-chevron-left"></i></button>
-        <h4 style="margin: 0px 0px 0px 10px;">Items you Liked</h4> 
-      </div>
-       <div class="panel-head" *ngIf="isProfile">
-         <button class="close-btn" (click)="setActive('Home');togglePanel();"><i class="fa-solid fa-chevron-left"></i></button>
-         <h4 style="margin: 0px 0px 0px 10px;">Profile Information</h4>
-      </div>
+<!-- SIDE PANEL (slides in/out) -->
+<div class="side-panel" [class.open]="isPanelOpen">
+  <div class="panel-header">
+    <div class="panel-head" *ngIf="isCart">
+      <button class="close-btn" (click)="setActive('Home');togglePanel(); ">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <h4 style="margin: 0px 0px 0px 10px">Items in Cart</h4>
     </div>
-    <div class="cart-list" style="flex: 1;overflow: auto;" *ngIf="isCart">
-      <div class="cart-section">
-        <div *ngFor="let item of selectedProduct" class="cart-item">
+    <div class="panel-head" *ngIf="isWishlist">
+      <button class="close-btn" (click)="setActive('Home');togglePanel(); ;">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <h4 style="margin: 0px 0px 0px 10px">Items you Liked</h4>
+    </div>
+    <div class="panel-head" *ngIf="isProfile">
+      <button class="close-btn" (click)="setActive('Home');togglePanel();">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <h4 style="margin: 0px 0px 0px 10px">Profile Information</h4>
+    </div>
+  </div>
+  <div
+    class="cart-list"
+    style="flex: 1; overflow: auto; display: flex; flex-direction: column"
+    *ngIf="isCart"
+  >
+    <div class="cart-section">
+      <div *ngFor="let item of selectedProduct" class="cart-item">
+        <div class="product-card">
+          <div class="like" (click)="removeFromCart(item)">
+            <i class="fa-regular fa-circle-xmark" style="color: #a453d0"></i>
+          </div>
+          <img
+            src="../../assets/vege.jpg"
+            alt="product"
+            class="product-image"
+          />
 
+          <div class="product-content">
+            <h3>{{ item.name }}</h3>
+            <p class="weight">{{ item.weight }}</p>
 
-          <div class="product-card">
- <div class="like" (click)="removeFromCart(item)">
-       <i class="fa-regular fa-circle-xmark" style="color: #a453d0;"></i>
-      </div>
-            <img src="../../assets/vege.jpg" alt="product" class="product-image" />
+            <div class="price-row">
+              <span class="price" style="width: 30%">${{ item.price }}</span>
 
-            <div class="product-content">
-              <h3>{{ item.name }}</h3>
-              <p class="weight">{{ item.weight }}</p>
+              <div class="add-btn" style="width: 70%" *ngIf="!item.isAdded">
+                <button class="add-button" (click)="onAdd(item)">Add</button>
+              </div>
 
-              <div class="price-row">
-                <span class="price" style="width: 30%;">${{ item.price }}</span>
-
-                <div class="add-btn" style="width: 70%;" *ngIf="!item.isAdded">
-                  <button class="add-button" (click)="onAdd(item)">Add</button>
-                </div>
-
-                <div class="count" style="width: 70%;display: flex;gap: 2px;" *ngIf="item.isAdded">
-                  <button class="decrease" (click)="onRemove(item)">-</button>
-                  <input type="number" class="quantity" [value]="getQuantity(item)"
-                    style="width: 60%;background-color: aliceblue;border: 1px solid gray;border-radius: 4px;" />
-                  <button class="increase" (click)="onAdd(item)">+</button>
-                </div>
+              <div
+                class="count"
+                style="width: 70%; display: flex; gap: 2px"
+                *ngIf="item.isAdded"
+              >
+                <button class="decrease" (click)="onRemove(item)">-</button>
+                <input
+                  type="number"
+                  class="quantity"
+                  [value]="getQuantity(item)"
+                  style="
+                    width: 60%;
+                    background-color: aliceblue;
+                    border: 1px solid gray;
+                    border-radius: 4px;
+                  "
+                />
+                <button class="increase" (click)="onAdd(item)">+</button>
               </div>
             </div>
           </div>
         </div>
-        <div class="no-item" *ngIf="selectedProduct.length === 0">
-          No products in the cart
-        </div>
       </div>
-      <div class="panel-footer" style="height: 10%;">
-        <div class="total">Total: ${{ totalPrice }}</div>
-        <div class="cart-buttons">
-          <button class="checkout-btn" (click)=" pay()">Payment</button>
-          <button class="checkout-btn" (click)="clearCart()">Clear Cart</button>
-        </div>
+      <div class="no-item" *ngIf="selectedProduct.length === 0">
+        No products in the cart
       </div>
     </div>
-    <div class="wish-list" *ngIf="isWishlist">
-      <div class="cart-section">
-        <div *ngFor="let item of wishlist" class="cart-item">
-          <div class="product-card">
-             <div class="like" (click)="removeFromWishlist(item)">
-       <i class="fa-regular fa-circle-xmark" style="color: #a453d0;"></i>
-      </div>
-
-            <img src="../../assets/vege.jpg" alt="product" class="product-image" />
-
-            <div class="product-content">
-              <h3>{{ item.name }}</h3>
-              <p class="weight">{{ item.weight }}</p>
-
-              <div class="price-row">
-                <span class="price" style="width: 30%;">${{ item.price }}</span>
-
-                <div class="add-btn" style="width: 70%;" *ngIf="!item.isAdded">
-                  <button class="add-button" (click)="onAdd(item)">Add</button>
-                </div>
-
-                <div class="count" style="width: 70%;display: flex;gap: 2px;" *ngIf="item.isAdded">
-                  <button class="decrease" (click)="onRemove(item)">-</button>
-                  <input type="number" class="quantity" [value]="getQuantity(item)"
-                    style="width: 60%;background-color: aliceblue;border: 1px solid gray;border-radius: 4px;" />
-                  <button class="increase" (click)="onAdd(item)">+</button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="no-item" *ngIf="wishlist.length === 0">
-            No products in the wishlist
-          </div>
-        </div>
-      </div>
-       <div class="panel-footer" style="height: 10%;">
-        <div class="total">Total: ${{ totalPrice }}</div>
-        <div class="cart-buttons">
-          <button class="checkout-btn">Payment</button>
-          <button class="checkout-btn" (click)="clearCart()">Clear Wishlist</button>
-        </div>
-      </div>
-    </div>
-    <div class="profile-details" *ngIf="isProfile">
-      <div class="user-details">
-       <div class="profile-img" >
-          <img src="../../assets/shivan.jpg" alt="User Profile" class="profile-image" style="border-radius: 50%;"/>
-       </div>
-       <div class="camera">
-               <i class="fa-solid fa-camera"></i>
-
-       </div>
-        <mat-form-field appearance="outline">
-          <mat-label>Name</mat-label>
-          <input matInput placeholder="Enter your name" [(ngModel)]="userName" />
-        </mat-form-field>
-         <mat-form-field appearance="outline">
-          <mat-label>Email</mat-label>
-          <input matInput placeholder="xyz@gmail.com"  [(ngModel)]="email"/>
-        </mat-form-field>
-         <mat-form-field appearance="outline">
-          <mat-label>Phone</mat-label>
-          <input matInput placeholder="9989878767" [(ngModel)]="phoneNumber"/>
-        </mat-form-field>
-         <mat-form-field appearance="outline">
-          <mat-label>Delivery Address</mat-label>
-          <input matInput placeholder="123, salem Tamilnadu" [(ngModel)]="address"/>
-        </mat-form-field>
- <div class="panel-footer" style="height: 10%;">
-        <div class="cart-buttons">
-          <button class="checkout-btn" (click)="saveUserData()">Save</button>
-          <button class="checkout-btn" (click)="clearCart()">Clear </button>
-        </div>
-      </div>
+    <div class="panel-footer">
+      <div class="total">Total: ${{ totalPrice }}</div>
+      <div class="cart-buttons">
+        <button class="checkout-btn" (click)=" pay()">Payment</button>
+        <button class="checkout-btn" (click)="clearCart()">Clear Cart</button>
       </div>
     </div>
   </div>
+  <div
+    class="wish-list"
+    style="flex: 1; overflow: auto; display: flex; flex-direction: column"
+    *ngIf="isWishlist"
+  >
+    <div class="cart-section">
+      <div *ngFor="let item of wishlist" class="cart-item">
+        <div class="product-card">
+          <div class="like" (click)="removeFromWishlist(item)">
+            <i class="fa-regular fa-circle-xmark" style="color: #a453d0"></i>
+          </div>
 
-  <div class="overlay" [class.show]="isPanelOpen" (click)="togglePanel()"></div>
+          <img
+            src="../../assets/vege.jpg"
+            alt="product"
+            class="product-image"
+          />
 
+          <div class="product-content">
+            <h3>{{ item.name }}</h3>
+            <p class="weight">{{ item.weight }}</p>
+
+            <div class="price-row">
+              <span class="price" style="width: 30%">${{ item.price }}</span>
+
+              <div class="add-btn" style="width: 70%" *ngIf="!item.isAdded">
+                <button class="add-button" (click)="onAdd(item)">Add</button>
+              </div>
+
+              <div
+                class="count"
+                style="width: 70%; display: flex; gap: 2px"
+                *ngIf="item.isAdded"
+              >
+                <button class="decrease" (click)="onRemove(item)">-</button>
+                <input
+                  type="number"
+                  class="quantity"
+                  [value]="getQuantity(item)"
+                  style="
+                    width: 60%;
+                    background-color: aliceblue;
+                    border: 1px solid gray;
+                    border-radius: 4px;
+                  "
+                />
+                <button class="increase" (click)="onAdd(item)">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="no-item" *ngIf="wishlist.length === 0">
+          No products in the wishlist
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <div class="total">Total: ${{ totalPrice }}</div>
+      <div class="cart-buttons">
+        <button class="checkout-btn">Payment</button>
+        <button class="checkout-btn" (click)="clearCart()">
+          Clear Wishlist
+        </button>
+      </div>
+    </div>
+  </div>
+  <div
+    class="profile-details"
+    style="flex: 1; overflow: auto; display: flex; flex-direction: column"
+    *ngIf="isProfile"
+  >
+    <div class="user-details">
+      <div class="profile-img">
+        <img
+          src="../../assets/shivan.jpg"
+          alt="User Profile"
+          class="profile-image"
+          style="border-radius: 50%"
+        />
+      </div>
+      <div class="camera">
+        <i class="fa-solid fa-camera"></i>
+      </div>
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput placeholder="Enter your name" [(ngModel)]="userName" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput placeholder="xyz@gmail.com" [(ngModel)]="email" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Phone</mat-label>
+        <input matInput placeholder="9989878767" [(ngModel)]="phoneNumber" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Delivery Address</mat-label>
+        <input
+          matInput
+          placeholder="123, salem Tamilnadu"
+          [(ngModel)]="address"
+        />
+      </mat-form-field>
+      <div class="panel-footer">
+        <div class="cart-buttons">
+          <button class="checkout-btn" (click)="saveUserData()">Save</button>
+          <button class="checkout-btn" (click)="clearCart()">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" [class.show]="isPanelOpen" (click)="togglePanel()"></div>
 
 <!-- <footer class="custom-footer">
  
@@ -344,30 +472,27 @@
     </ion-buttons>
 </footer> -->
 
-
-
 <ion-modal
   [isOpen]="isLoginOpen"
   (didDismiss)="isLoginOpen = false"
-  breakpoints="[0, 0.45, 0.80]"
-  initialBreakpoint="0.80"
-  handle="true"
+  [initialBreakpoint]="1"
+  [breakpoints]="[0, 1]"
   cssClass="bottom-sheet-modal"
 >
-  <ng-template>
-    <div class="sheet-container">
+  <ion-content class="ion-padding">
 
-      <ion-segment [(ngModel)]="authMode">
-        <ion-segment-button value="login">
-          <ion-label>Login</ion-label>
-        </ion-segment-button>
-        <ion-segment-button value="signup">
-          <ion-label>Sign Up</ion-label>
-        </ion-segment-button>
-      </ion-segment>
+    <ion-segment [(ngModel)]="authMode">
+      <ion-segment-button value="login">
+        <ion-label>Login</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="signup">
+        <ion-label>Sign Up</ion-label>
+      </ion-segment-button>
+    </ion-segment>
 
-      <!-- LOGIN -->
-      <div *ngIf="authMode === 'login'" class="form-box">
+    @if (authMode === 'login') {
+      <div class="form-box">
+
         <ion-item>
           <ion-label position="floating">Username / Phone Number</ion-label>
           <ion-input></ion-input>
@@ -378,11 +503,19 @@
           <ion-input type="password"></ion-input>
         </ion-item>
 
-        <ion-button expand="block" shape="round" class="mt-3 btn-signUp">Login</ion-button>
-      </div>
+        <ion-button expand="block" shape="round" class="mt-3 btn-signUp">
+          LOGIN
+        </ion-button>
 
-      <!-- SIGNUP -->
-      <div *ngIf="authMode === 'signup'" class="form-box">
+        <p class="skip-btn" (click)="authMode = 'signup'">Create new account</p>
+
+        <p class="skip-btn" (click)="skip()">Skip →</p>
+      </div>
+    }
+
+    @if (authMode === 'signup') {
+      <div class="form-box">
+
         <ion-item>
           <ion-label position="floating">Username</ion-label>
           <ion-input></ion-input>
@@ -403,11 +536,16 @@
           <ion-input type="password"></ion-input>
         </ion-item>
 
-        <ion-button expand="block" shape="round" class="mt-3 btn-signUp">Sign Up</ion-button>
-      </div>
+        <ion-button expand="block" shape="round" class="mt-3 btn-signUp">
+          SIGN UP
+        </ion-button>
 
-      <p class="skip-btn" (click)="skip()">Skip →</p>
-    </div>
-  </ng-template>
+        <p class="switch" (click)="authMode = 'login'">Back to Login</p>
+      </div>
+    }
+
+    
+  </ion-content>
 </ion-modal>
+
 

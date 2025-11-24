@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild, TemplateRef } from '@angular/core';
+import { Component, ViewChild, TemplateRef,NgZone, ChangeDetectorRef  } from '@angular/core';
 import { ModalController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -9,6 +9,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
 import { HttpClient,HttpClientModule } from '@angular/common/http';
 import {CdkDrag} from '@angular/cdk/drag-drop';
+import { IonModal } from '@ionic/angular';
 import { Geolocation } from '@capacitor/geolocation';
 // nodemailer is a Node.js-only module and cannot be used in browser/Angular components.
 // Move email-sending logic to a backend service (e.g. Node/Express) and call it via HTTP.
@@ -57,6 +58,9 @@ imports: [
 export class HomePage {
 
   @ViewChild('loginSheet') loginSheet!: TemplateRef<any>;
+  @ViewChild(IonModal) modal!: IonModal;
+
+
 
 
   searchText = '';
@@ -103,6 +107,12 @@ isHome = true;
 isProfile = false;
 isCart = false;
 isWishlist = false;
+
+ngAfterViewInit() {
+ this.modal.presentingElement = document.querySelector('ion-router-outlet') as HTMLElement;
+
+}
+
 resetStates(){
   this.isHome = false;
   this.isProfile = false;
@@ -277,12 +287,9 @@ ngOnInit() {
   this.address=localStorage.getItem("address")||'';
   this.phoneNumber=localStorage.getItem("phoneNumber")||'';
 
-   setTimeout(() => {
-      this.openLoginSheet();
-    }, 300); 
+  setTimeout(() => this.openLoginSheet(), 300);
     
 }
-
 
 
 
@@ -481,7 +488,8 @@ selectSuggestion(suggestion: string) {
     p.name?.toLowerCase().includes(suggestion.toLowerCase())
   );
 }
-constructor(private http: HttpClient,private modalCtrl: ModalController) {}
+constructor(private http: HttpClient,private modalCtrl: ModalController, private zone: NgZone,
+    private cdr: ChangeDetectorRef) {}
 // async getLocation() {
 //   this.errorMsg = null;
 
@@ -615,17 +623,18 @@ getQuantity(item: any): number {
     this.searchText = cat.name;
   }
 
+authMode: 'login' | 'signup' = 'login';
+isLoginOpen = false;
 
- isLoginOpen = false;
-  authMode: 'login' | 'signup' = 'login';
+openLoginSheet() {
+  this.authMode = 'login';
+  this.isLoginOpen = true;
+}
 
-  openLoginSheet() {
-    this.authMode = 'login';
-    this.isLoginOpen = true;
-  }
+skip() {
+  this.isLoginOpen = false;
+}
 
-  skip() {
-    this.isLoginOpen = false;
-  }
+
 
 }
