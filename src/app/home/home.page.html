@@ -273,7 +273,8 @@
       <button class="close-btn" (click)="setActive('Home');togglePanel();">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
-      <h4 style="margin: 0px 0px 0px 10px">Profile Information</h4>
+      <h4 style="margin: 0px 0px 0px 10px" *ngIf="!paymentModeUI">Profile Information</h4>
+      <h4 style="margin: 0px 0px 0px 10px" *ngIf="paymentModeUI">Place order</h4>
     </div>
   </div>
   <div
@@ -334,7 +335,8 @@
     <div class="panel-footer">
       <div class="total">Total: ${{ totalPrice }}</div>
       <div class="cart-buttons">
-        <button class="checkout-btn" (click)=" pay()">Payment</button>
+        <button class="checkout-btn" (click)="onPlaceOrder()">Place order</button>
+        <!-- (click)=" pay()" -->
         <button class="checkout-btn" (click)="clearCart()">Clear Cart</button>
       </div>
     </div>
@@ -405,13 +407,15 @@
       </div>
     </div>
   </div>
+
+
   <div
     class="profile-details"
     style="flex: 1; overflow: auto; display: flex; flex-direction: column"
-    *ngIf="isProfile"
+    *ngIf="isProfile || paymentModeUI "
   >
     <div class="user-details">
-      <div class="profile-img">
+      <div class="profile-img" *ngIf="!paymentModeUI">
         <img
           src="../../assets/shivan.jpg"
           alt="User Profile"
@@ -419,36 +423,48 @@
           style="border-radius: 50%"
         />
       </div>
-      <div class="camera">
+      <div class="camera" *ngIf="!paymentModeUI">
         <i class="fa-solid fa-camera"></i>
       </div>
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" class="full-width-field">
         <mat-label>Name</mat-label>
         <input matInput placeholder="Enter your name" [(ngModel)]="userName" />
       </mat-form-field>
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" class="full-width-field">
         <mat-label>Email</mat-label>
-        <input matInput placeholder="xyz@gmail.com" [(ngModel)]="email" />
+        <input matInput placeholder="Enter your gmail" [(ngModel)]="email" />
       </mat-form-field>
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" class="full-width-field">
         <mat-label>Phone</mat-label>
-        <input matInput placeholder="9989878767" [(ngModel)]="phoneNumber" />
+        <input matInput placeholder="Enter your phone no" [(ngModel)]="phoneNumber" />
       </mat-form-field>
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" class="full-width-field">
         <mat-label>Delivery Address</mat-label>
         <input
           matInput
-          placeholder="123, salem Tamilnadu"
+          placeholder="Enter your address"
           [(ngModel)]="address"
         />
       </mat-form-field>
-      <div class="panel-footer">
+      
+      <div class="payment-container" *ngIf="paymentModeUI">
+        <div class="payment-title">Payment Mode</div>
+
+       <mat-radio-group [(ngModel)]="paymentMode" class="payment-mode-group">
+  <mat-radio-button value="cash">Cash</mat-radio-button>
+  <mat-radio-button value="card">Card</mat-radio-button>
+  <mat-radio-button value="upi">UPI</mat-radio-button>
+</mat-radio-group>
+      </div>
+
+    </div>
+
+          <div class="panel-footer">
         <div class="cart-buttons">
           <button class="checkout-btn" (click)="saveUserData()">Save</button>
           <button class="checkout-btn" (click)="clearCart()">Clear</button>
         </div>
       </div>
-    </div>
   </div>
 </div>
 

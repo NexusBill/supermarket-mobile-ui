@@ -11,6 +11,9 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CdkDrag } from '@angular/cdk/drag-drop';
 import { IonModal } from '@ionic/angular';
 import { Geolocation } from '@capacitor/geolocation';
+import { MatRadioModule } from '@angular/material/radio';
+import { ToastController } from '@ionic/angular';
+import { Capacitor } from '@capacitor/core';
 // nodemailer is a Node.js-only module and cannot be used in browser/Angular components.
 // Move email-sending logic to a backend service (e.g. Node/Express) and call it via HTTP.
 // import nodemailer from "nodemailer";
@@ -53,9 +56,9 @@ interface Product {
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
-    CdkDrag
-  ]
-})
+    CdkDrag,
+    MatRadioModule
+    ]})
 export class HomePage {
 
   @ViewChild('loginSheet') loginSheet!: TemplateRef<any>;
@@ -63,7 +66,7 @@ export class HomePage {
 
 
 
-
+paymentMode: string = '';
   searchText = '';
   latitude: number | null = null;
   longitude: number | null = null;
@@ -114,101 +117,45 @@ export class HomePage {
 
   }
 
-  resetStates() {
-    this.isHome = false;
-    this.isProfile = false;
-    this.isCart = false;
-    this.isWishlist = false;
-  }
-  products: Product[] = [];
-
-  //Customer Addition Post  http://localhost:3000/api/nexus_supermart/customers -------> make get to fetc customers
-  // //##################{
-  //   "customerId": "CUST002",
-  //   "name": "Kaviyarasan",
-  //   "mobile": "9994305384",
-  //   "password": "12345",
-  //   "address": "Govt, school chekkanam",
-  //   "points": 0
-  // }#############
-
-
-  //Login Post  http://localhost:3000/api/nexus_supermart/customers/login
-  //##################{
-  //   "mobile": "9994305384",
-  //   "password": "12345"
-  // }#############
-
-
-  /******************
-   * POST /api/<clientCode>/customers/forgot-password
-    * Request body:
-    * {
-    "mobile": "9988776655",
-    "newPassword": "54321"
-  }
-
-
-
-
-**********API for Order Placement**********  
-  POST /api/nexus_supermart/orders
-  Get Orders:  /api/nexus_supermart/orders
-
-  ********** Request Body for Order Placement **********{
-  "customer": "kaviyarasan",
-  "mobile": "9988776655",
-  "amount": 550,
-  "status":"Order Initiated",
-  "discount": 50,
-  "savings": 60,
-  "date": "2025-08-03T18:45:00",
-  "amountPaid": 500,
-  "paymentMode": "upi",
-  "orderBy": "By Application",
-  "deliveryAddress": "12, Gandhi Nagar, Chennai",
-  "products": [
-    {
-      "productId": "P001",
-      "name": "Chicken Biryani",
-      "price": 200,
-      "qty": 2,
-      "total": 400
-    },
-    {
-      "productId": "P002",
-      "name": "Parotta",
-      "price": 75,
-      "qty": 2,
-      "total": 150
-    }
-  ]
+resetStates(){
+  this.isHome = false;
+  this.isProfile = false;
+  this.isCart = false;
+  this.isWishlist = false;
+  this.paymentModeUI= false;
 }
+products: Product[] = [];
 
-  *****************cancel Order******************
-PUT /api/<clientCode>/orders/<orderId>
-{
-  "status": "Cancelled by Customer"
-  }
-    ******************/
 
-  getProducts() {
-    this.http.get<Product[]>("https://supermartspring.vercel.app/api/nexus_supermart/products?page=1&limit=10").subscribe((data: any) => {
-      debugger
-      this.products = data;
+getProducts() {
+  this.http
+    .get("https://supermartspring.vercel.app/api/nexus_supermart/products?page=1&limit=10")
+    .subscribe((res: any) => {
+      debugger;
+
+      this.products = res.data; 
       this.productsBackup = [...this.products];
     });
+}
+paymentModeUI:boolean=false;
+
+onPlaceOrder() {
+this.isCart=false;
+this.isWishlist=false;
+this.isProfile=true;
+this.paymentModeUI= true;
+}
+
+togglePanel() {
+  debugger
+  this.isPanelOpen = !this.isPanelOpen;
+  if (this.isPanelOpen) {
+    this.calculateTotals();
   }
-  togglePanel() {
-    debugger
-    this.isPanelOpen = !this.isPanelOpen;
-    if (this.isPanelOpen) {
-      this.calculateTotals();
-    }
-  }
-  isDragging = false;
-  offsetX = 0;
-  offsetY = 0;
+}
+isDragging = false;
+offsetX = 0;
+offsetY = 0;
 
   startDrag(event: MouseEvent) {
     this.isDragging = true;
@@ -254,10 +201,10 @@ PUT /api/<clientCode>/orders/<orderId>
   async pay() {
     const amountInPaise = Math.round(this.totalPrice * 100);
 
-    if (amountInPaise <= 0) {
-      alert("Cart is empty!");
-      return;
-    }
+  if (amountInPaise <= 0) {
+     this.showToast('Cart is empty!');
+    return;
+  }
 
     // 1️⃣ CREATE ORDER FROM BACKEND
     this.http.post("https://supermartspring.vercel.app/create-order", {
@@ -292,10 +239,10 @@ PUT /api/<clientCode>/orders/<orderId>
 
       const rzp = new (window as any).Razorpay(options);
 
-      rzp.on("payment.failed", (err: any) => {
-        alert("Payment Failed!");
-        console.error(err);
-      });
+    rzp.on("payment.failed", (err: any) => {
+      this.showToast('Payment Failed! Please try again.');
+      console.error(err);
+    });
 
       rzp.open();
     });
@@ -307,18 +254,18 @@ PUT /api/<clientCode>/orders/<orderId>
       razorpay_signature: response.razorpay_signature
     }).subscribe((res: any) => {
 
-      if (res.success) {
-        alert("Payment Verified Successfully!");
+    if (res.success) {
+      this.successToaster('Payment Verified Successfully!');
 
-        // your custom logic
-        this.sendmail();
-        this.clearCart();
-        this.isPanelOpen = false;
-      } else {
-        alert("Payment verification failed");
-      }
-    });
-  }
+      // your custom logic
+      this.sendmail();          
+      this.clearCart();         
+      this.isPanelOpen = false; 
+    } else {
+       this.showToast('Payment verification failed');
+    }
+  });
+}
 
 
 
@@ -395,22 +342,34 @@ PUT /api/<clientCode>/orders/<orderId>
       this.isWishlist = true;
     }
 
-  }
-  saveUserData() {
-    localStorage.setItem("userName", this.userName);
-    localStorage.setItem("emai", this.email);
-    localStorage.setItem("address", this.address);
-    localStorage.setItem("phoneNumber", this.phoneNumber);
-    this.userName = this.email = this.address = this.phoneNumber = '';
+}
+saveUserData(){
+  debugger
+  if(this.userName !== '' &&
+    this.email !== '' &&
+    this.address !== '' &&
+    this.phoneNumber !== '' &&
+    this.paymentMode !== ''){
+        localStorage.setItem("userName",this.userName);
+        localStorage.setItem("emai",this.email);
+        localStorage.setItem("address",this.address);
+        localStorage.setItem("phoneNumber",this.phoneNumber);
+        this.userName=this.email=this.address=this.phoneNumber='';
+      if(this.paymentModeUI){
 
-  }
-  userName!: string;
-  email!: string;
-  address!: string;
-  phoneNumber!: string;
-  sendmail() {
-    debugger;
-    let html = `
+    this.pay();
+       }
+    }else{
+      this.showToast('Please fill all required fields');
+    }
+}
+userName!:string;
+email!:string;
+address!:string;
+phoneNumber!:string;
+sendmail() {
+  debugger;
+   let html = `
   <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; width:100%;">
     <tr style="background:#eee;">
       <th>Item</th>
@@ -447,32 +406,32 @@ PUT /api/<clientCode>/orders/<orderId>
     };
     let products: any[] = [];
 
-    this.selectedProduct.forEach(item => {
-      products.push({
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price
-      });
-    });
-    data.template_params['message'] = JSON.stringify(products);
-    this.http.post(
-      'https://api.emailjs.com/api/v1.0/email/send',
-      data,
-      { responseType: 'text' }
-    ).subscribe({
-      next: (res: string) => {
-        console.log('EmailJS Response:', res);
-        alert('Order Placed ✅');
-        this.selectSuggestion('');
-        this.clearCart();
-        this.isPanelOpen = false;
-        this.selectedProduct = [];
-      },
-      error: (err) => {
-        console.error('EmailJS Error:', err);
-        alert('Failed to send email ❌');
-      }
-    });
+this.selectedProduct.forEach(item=>{
+  products.push({
+    name:item.name,
+    quantity:item.quantity,
+    price:item.price
+  });
+});
+data.template_params['message']=JSON.stringify(products);
+this.http.post(
+  'https://api.emailjs.com/api/v1.0/email/send',
+  data,
+  { responseType: 'text' }  
+).subscribe({
+  next: (res: string) => {
+    console.log('EmailJS Response:', res);
+    this.successToaster('Order placed successfully ✅');
+    this.selectSuggestion('');
+    this.clearCart();
+    this.isPanelOpen = false;
+    this.selectedProduct = [];
+  },
+  error: (err) => {
+    console.error('EmailJS Error:', err);
+    this.showToast('Failed to send email ❌');
+  }
+});
 
   }
   clearCart() {
@@ -499,20 +458,59 @@ PUT /api/<clientCode>/orders/<orderId>
     'Dairy', 'Fruits', 'Instant Food', 'Bakery', 'Grains', 'Snacks', 'Vegetables', 'Meat', 'Daily Needs', 'Pulses', 'Beverages', 'Condiments', 'Breakfast', 'General'
   ];
 
-  filteredSuggestions: Product[] = [];
-  async getLocation() {
-    const pos = await Geolocation.getCurrentPosition();
-    this.latitude = pos.coords.latitude;
-    this.longitude = pos.coords.longitude;
+filteredSuggestions: Product[] = [];
+async getLocation() {
+  try {
+    if (Capacitor.getPlatform() === 'web') {
+      // Web fallback
+      if (!navigator.geolocation) {
+        console.error('Geolocation not supported in this browser');
+        this.errorMsg = 'Geolocation not supported';
+        return;
+      }
 
-    this.getCityByAPI(this.latitude, this.longitude);
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          this.latitude = pos.coords.latitude;
+          this.longitude = pos.coords.longitude;
+          console.log('Web Lat:', this.latitude, 'Lng:', this.longitude);
+
+          this.getCityByAPI(this.latitude, this.longitude);
+        },
+        (err) => {
+          console.error('Web geolocation error:', err);
+          this.errorMsg = 'Failed to get location';
+        },
+        { enableHighAccuracy: true, timeout: 15000 }
+      );
+
+    } else {
+      // Mobile (iOS/Android)
+      const perm = await Geolocation.requestPermissions();
+      if (perm.location === 'denied') {
+        console.error('Location permission denied');
+        this.errorMsg = 'Permission denied';
+        return;
+      }
+
+      const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
+      this.latitude = pos.coords.latitude;
+      this.longitude = pos.coords.longitude;
+      console.log('Mobile Lat:', this.latitude, 'Lng:', this.longitude);
+
+      this.getCityByAPI(this.latitude, this.longitude);
+    }
+  } catch (error) {
+    console.error('Error getting location', error);
+    this.errorMsg = 'Failed to get location';
   }
-  postalCode: string | null = null;
-  getCityByAPI(lat: number, lng: number) {
-    //`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`;
-    const url = `https://us1.locationiq.com/v1/reverse?key=pk.c7e493dd7d985c4d9562498de05c0711&lat=${lat}&lon=${lng}&format=json&zoom=18`;
-    //https://us1.locationiq.com/v1/reverse?key=pk.c7e493dd7d985c4d9562498de05c0711&lat=9.941420658997988&lon=77.96932102307461&format=json
-    //const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`;
+}
+postalCode: string | null = null;
+getCityByAPI(lat: number, lng: number) {
+ //`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`;
+  const url =  `https://us1.locationiq.com/v1/reverse?key=pk.c7e493dd7d985c4d9562498de05c0711&lat=${lat}&lon=${lng}&format=json&zoom=18`;
+//https://us1.locationiq.com/v1/reverse?key=pk.c7e493dd7d985c4d9562498de05c0711&lat=9.941420658997988&lon=77.96932102307461&format=json
+  //const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`;
 
     this.http.get(url).subscribe((data: any) => {
       debugger
@@ -538,33 +536,32 @@ PUT /api/<clientCode>/orders/<orderId>
       this.products = [...this.productsBackup];
     } else {
       this.filteredSuggestions = this.products.filter(p =>
-        p.Category?.toLowerCase().includes(value.toLowerCase()) || p.name?.toLowerCase().includes(value.toLowerCase())
-      );
-      this.filteredSuggestions = this.filteredSuggestions.slice(0, 5);
-    }
+    p.Category?.toLowerCase().includes(value.toLowerCase()) || p.name?.toLowerCase().includes(value.toLowerCase())
+  );
+    this.filteredSuggestions = this.filteredSuggestions.slice(0, 5);
   }
-  showAlert = false;
-  alertEnabler() {
-    this.showAlert = this.showAlert ? false : true;
+}
+   showAlert = false;
+   alertEnabler() {
+     this.showAlert = this.showAlert ? false : true;
+   }
+productsBackup: Product[] = [];
+selectSuggestion(suggestion: string) {
+  debugger;
+  this.filteredSuggestions = [];
+  if(this.productsBackup.length===0){
+    this.productsBackup = [...this.products];
+  }else{
+    this.products = [...this.productsBackup];
   }
-  productsBackup: Product[] = [];
-  selectSuggestion(suggestion: string) {
-    debugger;
-    this.filteredSuggestions = [];
-    if (this.productsBackup.length === 0) {
-      this.productsBackup = [...this.products];
-    } else {
-      this.products = [...this.productsBackup];
-    }
-    this.products = this.products.filter(p =>
-      p.Category?.toLowerCase().includes(suggestion.toLowerCase()) ||
-      p.name?.toLowerCase().includes(suggestion.toLowerCase())
-    );
-  }
-  constructor(private http: HttpClient, private modalCtrl: ModalController, private zone: NgZone,
-    private cdr: ChangeDetectorRef) { }
-  // async getLocation() {
-  //   this.errorMsg = null;
+  this.products = this.products.filter(p =>
+    p.Category?.toLowerCase().includes(suggestion.toLowerCase()) ||
+    p.name?.toLowerCase().includes(suggestion.toLowerCase())
+  );
+}
+constructor(private http: HttpClient,private modalCtrl: ModalController, private zone: NgZone,private toastCtrl: ToastController,    private cdr: ChangeDetectorRef) {}
+// async getLocation() {
+//   this.errorMsg = null;
 
   //   try {
   //     // Request permission
@@ -708,6 +705,25 @@ PUT /api/<clientCode>/orders/<orderId>
     this.isLoginOpen = false;
   }
 
+async showToast(message: string) {
+  const toast = await this.toastCtrl.create({
+    message,
+    duration: 2000,
+    position: 'bottom',
+    color: 'danger'
+  });
+  toast.present();
+}
+
+async successToaster(message: string) {
+  const toast = await this.toastCtrl.create({
+    message,
+    duration: 2000,
+    position: 'bottom',
+    color: 'success' 
+  });
+  toast.present();
+}
 
 
 }
