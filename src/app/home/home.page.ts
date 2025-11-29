@@ -11,6 +11,9 @@ import { HttpClient,HttpClientModule } from '@angular/common/http';
 import {CdkDrag} from '@angular/cdk/drag-drop';
 import { IonModal } from '@ionic/angular';
 import { Geolocation } from '@capacitor/geolocation';
+import { MatRadioModule } from '@angular/material/radio';
+import { ToastController } from '@ionic/angular';
+import { Capacitor } from '@capacitor/core';
 // nodemailer is a Node.js-only module and cannot be used in browser/Angular components.
 // Move email-sending logic to a backend service (e.g. Node/Express) and call it via HTTP.
 // import nodemailer from "nodemailer";
@@ -53,7 +56,8 @@ imports: [
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
-    CdkDrag
+    CdkDrag,
+    MatRadioModule
     ]})
 export class HomePage {
 
@@ -62,7 +66,7 @@ export class HomePage {
 
 
 
-
+paymentMode: string = '';
   searchText = '';
  latitude: number | null = null;
   longitude: number | null = null;
@@ -118,15 +122,30 @@ resetStates(){
   this.isProfile = false;
   this.isCart = false;
   this.isWishlist = false;
+  this.paymentModeUI= false;
 }
 products: Product[] = [];
-getProducts(){
-  this.http.get<Product[]>("https://supermartspring.vercel.app/api/nexus_supermart/products?page=1&limit=10").subscribe((data:any)=>{
-    debugger
-    this.products=data;
-    this.productsBackup=[...this.products];
-  });
+
+
+getProducts() {
+  this.http
+    .get("https://supermartspring.vercel.app/api/nexus_supermart/products?page=1&limit=10")
+    .subscribe((res: any) => {
+      debugger;
+
+      this.products = res.data; 
+      this.productsBackup = [...this.products];
+    });
 }
+paymentModeUI:boolean=false;
+
+onPlaceOrder() {
+this.isCart=false;
+this.isWishlist=false;
+this.isProfile=true;
+this.paymentModeUI= true;
+}
+
 togglePanel() {
   debugger
   this.isPanelOpen = !this.isPanelOpen;
@@ -183,7 +202,7 @@ async pay() {
   const amountInPaise = Math.round(this.totalPrice * 100);
 
   if (amountInPaise <= 0) {
-    alert("Cart is empty!");
+     this.showToast('Cart is empty!');
     return;
   }
 
@@ -221,7 +240,7 @@ upi: {
     const rzp = new (window as any).Razorpay(options);
 
     rzp.on("payment.failed", (err: any) => {
-      alert("Payment Failed!");
+      this.showToast('Payment Failed! Please try again.');
       console.error(err);
     });
 
@@ -236,14 +255,14 @@ verifyPayment(response: any) {
   }).subscribe((res: any) => {
 
     if (res.success) {
-      alert("Payment Verified Successfully!");
+      this.successToaster('Payment Verified Successfully!');
 
       // your custom logic
       this.sendmail();          
       this.clearCart();         
       this.isPanelOpen = false; 
     } else {
-      alert("Payment verification failed");
+       this.showToast('Payment verification failed');
     }
   });
 }
@@ -325,12 +344,24 @@ this.resetStates();
 
 }
 saveUserData(){
-  localStorage.setItem("userName",this.userName);
-  localStorage.setItem("emai",this.email);
-  localStorage.setItem("address",this.address);
-  localStorage.setItem("phoneNumber",this.phoneNumber);
-  this.userName=this.email=this.address=this.phoneNumber='';
-  
+  debugger
+  if(this.userName !== '' &&
+    this.email !== '' &&
+    this.address !== '' &&
+    this.phoneNumber !== '' &&
+    this.paymentMode !== ''){
+        localStorage.setItem("userName",this.userName);
+        localStorage.setItem("emai",this.email);
+        localStorage.setItem("address",this.address);
+        localStorage.setItem("phoneNumber",this.phoneNumber);
+        this.userName=this.email=this.address=this.phoneNumber='';
+      if(this.paymentModeUI){
+
+    this.pay();
+       }
+    }else{
+      this.showToast('Please fill all required fields');
+    }
 }
 userName!:string;
 email!:string;
@@ -390,7 +421,7 @@ this.http.post(
 ).subscribe({
   next: (res: string) => {
     console.log('EmailJS Response:', res);
-    alert('Order Placed ✅');
+    this.successToaster('Order placed successfully ✅');
     this.selectSuggestion('');
     this.clearCart();
     this.isPanelOpen = false;
@@ -398,7 +429,7 @@ this.http.post(
   },
   error: (err) => {
     console.error('EmailJS Error:', err);
-    alert('Failed to send email ❌');
+    this.showToast('Failed to send email ❌');
   }
 });
 
@@ -429,11 +460,50 @@ suggestions: string[] = [
 
 filteredSuggestions: Product[] = [];
 async getLocation() {
-  const pos = await Geolocation.getCurrentPosition();
-  this.latitude = pos.coords.latitude;
-  this.longitude = pos.coords.longitude;
+  try {
+    if (Capacitor.getPlatform() === 'web') {
+      // Web fallback
+      if (!navigator.geolocation) {
+        console.error('Geolocation not supported in this browser');
+        this.errorMsg = 'Geolocation not supported';
+        return;
+      }
 
-  this.getCityByAPI(this.latitude, this.longitude);
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          this.latitude = pos.coords.latitude;
+          this.longitude = pos.coords.longitude;
+          console.log('Web Lat:', this.latitude, 'Lng:', this.longitude);
+
+          this.getCityByAPI(this.latitude, this.longitude);
+        },
+        (err) => {
+          console.error('Web geolocation error:', err);
+          this.errorMsg = 'Failed to get location';
+        },
+        { enableHighAccuracy: true, timeout: 15000 }
+      );
+
+    } else {
+      // Mobile (iOS/Android)
+      const perm = await Geolocation.requestPermissions();
+      if (perm.location === 'denied') {
+        console.error('Location permission denied');
+        this.errorMsg = 'Permission denied';
+        return;
+      }
+
+      const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
+      this.latitude = pos.coords.latitude;
+      this.longitude = pos.coords.longitude;
+      console.log('Mobile Lat:', this.latitude, 'Lng:', this.longitude);
+
+      this.getCityByAPI(this.latitude, this.longitude);
+    }
+  } catch (error) {
+    console.error('Error getting location', error);
+    this.errorMsg = 'Failed to get location';
+  }
 }
 postalCode: string | null = null;
 getCityByAPI(lat: number, lng: number) {
@@ -489,8 +559,7 @@ selectSuggestion(suggestion: string) {
     p.name?.toLowerCase().includes(suggestion.toLowerCase())
   );
 }
-constructor(private http: HttpClient,private modalCtrl: ModalController, private zone: NgZone,
-    private cdr: ChangeDetectorRef) {}
+constructor(private http: HttpClient,private modalCtrl: ModalController, private zone: NgZone,private toastCtrl: ToastController,    private cdr: ChangeDetectorRef) {}
 // async getLocation() {
 //   this.errorMsg = null;
 
@@ -636,6 +705,25 @@ skip() {
   this.isLoginOpen = false;
 }
 
+async showToast(message: string) {
+  const toast = await this.toastCtrl.create({
+    message,
+    duration: 2000,
+    position: 'bottom',
+    color: 'danger'
+  });
+  toast.present();
+}
+
+async successToaster(message: string) {
+  const toast = await this.toastCtrl.create({
+    message,
+    duration: 2000,
+    position: 'bottom',
+    color: 'success' 
+  });
+  toast.present();
+}
 
 
 }

@@ -73,3 +73,25 @@ body {
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* Custom Angular Material Radio Color */
+.mat-radio-button.mat-accent .mat-radio-outer-circle {
+  border-color: #a453d0 !important;
+}
+
+.mat-radio-button.mat-accent .mat-radio-inner-circle {
+  background-color: #a453d0 !important;
+}
+
+/* Label color */
+.mat-radio-label-content {
+  color: #a453d0 !important;
+}
+
+/* Arrange all radios in one line */
+.payment-mode-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+}
