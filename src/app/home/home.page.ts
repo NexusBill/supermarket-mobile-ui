@@ -121,7 +121,8 @@ resetStates(){
 }
 products: Product[] = [];
 getProducts(){
-  this.http.get<Product[]>("https://supermartspring.vercel.app/products").subscribe((data:any)=>{
+  this.http.get<Product[]>("https://supermartspring.vercel.app/api/nexus_supermart/products?page=1&limit=10").subscribe((data:any)=>{
+    debugger
     this.products=data;
     this.productsBackup=[...this.products];
   });
