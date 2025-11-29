@@ -1117,7 +1117,7 @@ ion-avatar img {
   align-items: center;
   gap: 10%;
   cursor: grab;
-  z-index: 2;
+  z-index: 11 !important;
 }
 
 }
@@ -1248,7 +1248,7 @@ ion-avatar img {
   align-items: center;
   gap: 10%;
   cursor: grab;
-  z-index: 9999;
+  z-index: 11 !important;
 }
 
     .nav-buttons {
