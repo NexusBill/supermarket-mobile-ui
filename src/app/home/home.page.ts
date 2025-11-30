@@ -14,6 +14,8 @@ import { Geolocation } from '@capacitor/geolocation';
 import { MatRadioModule } from '@angular/material/radio';
 import { ToastController } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
+import { SupermartService } from '../services/supermart.services';
+
 // nodemailer is a Node.js-only module and cannot be used in browser/Angular components.
 // Move email-sending logic to a backend service (e.g. Node/Express) and call it via HTTP.
 // import nodemailer from "nodemailer";
@@ -73,6 +75,8 @@ paymentMode: string = '';
   city: string | null = null;
   fullAddress: string | null = null;
   errorMsg: string | null = null;
+  isOrderHistory = false;
+  orders: any[] = [];
   categories: Category[] = [
     { id: 'snacks', name: 'Snacks', icon: 'https://via.placeholder.com/64?text=Sn' },
     { id: 'breakfast', name: 'Breakfast', icon: 'https://via.placeholder.com/64?text=Bf' },
@@ -101,6 +105,32 @@ paymentMode: string = '';
     { id: 'veg', name: 'Vegetables', icon: 'https://via.placeholder.com/64?text=Vg' },
   ];
 
+  isModalOpen = false;
+  isSignupMode = false;
+  isForgotMode: boolean = false;
+  isLoginMode: boolean = true;
+
+      forgotData = {
+      identifier: '',
+      otp: '',
+      password: ''
+    };
+
+    otpSent = false;
+
+  loginData = {
+    identifier: '',
+    password: ''
+  };
+
+
+  signupData = {
+  name: '',
+  mobile: '',
+  password: '',
+  confirm: '',
+  address: ''
+  };
 
   selectedProduct: Product[] = [];
   wishlist: Product[] = [];
@@ -175,6 +205,53 @@ offsetY = 0;
     footer.style.bottom = 'auto';
   }
 
+  openOrderHistory() {
+  this.isOrderHistory = true;
+  this.isCart = false;
+  this.isWishlist = false;
+  this.isProfile = false;
+
+  this.loadOrders();
+}
+
+closeOrderHistory() {
+  this.isOrderHistory = false;
+  this.isProfile = true;
+}
+
+loadOrders() {
+ this.supermartService.getOrders().subscribe({
+    next: (res: any) => {
+      this.orders = res;
+    },
+    error: () => {
+      this.showToast("Failed to load orders",'danger');
+    }
+  });
+}
+
+cancelOrder(id: string) {
+  const body = { status: "Cancelled by Customer" };
+
+  this.supermartService.cancelOrder(id, body).subscribe({
+    next: () => {
+      this.showToast("Order cancelled",'success');
+      this.loadOrders();
+    },
+    error: () => {
+      this.showToast("Unable to cancel",'danger');
+    }
+  });
+}
+
+logout() {
+  localStorage.clear();
+  this.showToast("Logged out",'success');
+  this.isProfile = false;
+  this.togglePanel();
+}
+
+
   // add near other methods in the HomePage class
 
   // helper: ensure Razorpay script loaded (you already have this but keep it)
@@ -202,7 +279,7 @@ offsetY = 0;
     const amountInPaise = Math.round(this.totalPrice * 100);
 
   if (amountInPaise <= 0) {
-     this.showToast('Cart is empty!');
+     this.showToast('Cart is empty!','danger');
     return;
   }
 
@@ -240,32 +317,79 @@ offsetY = 0;
       const rzp = new (window as any).Razorpay(options);
 
     rzp.on("payment.failed", (err: any) => {
-      this.showToast('Payment Failed! Please try again.');
+      this.showToast('Payment Failed! Please try again.','danger');
       console.error(err);
     });
 
       rzp.open();
     });
   }
-  verifyPayment(response: any) {
-    this.http.post("https://supermartspring.vercel.app/verify-payment", {
-      razorpay_order_id: response.razorpay_order_id,
-      razorpay_payment_id: response.razorpay_payment_id,
-      razorpay_signature: response.razorpay_signature
-    }).subscribe((res: any) => {
+verifyPayment(response: any) {
 
-    if (res.success) {
-      this.successToaster('Payment Verified Successfully!');
+  // STEP 1: Verify Razorpay payment
+  this.http.post("https://supermartspring.vercel.app/verify-payment", {
+    razorpay_order_id: response.razorpay_order_id,
+    razorpay_payment_id: response.razorpay_payment_id,
+    razorpay_signature: response.razorpay_signature
+  }).subscribe({
+    next: (res: any) => {
 
-      // your custom logic
-      this.sendmail();          
-      this.clearCart();         
-      this.isPanelOpen = false; 
-    } else {
-       this.showToast('Payment verification failed');
+      if (res.success) {
+
+        this.showToast('Payment Verified Successfully! ✅', 'success');
+        this.isPanelOpen=false;
+        // STEP 2: Get customerId from logged-in user
+        const user = JSON.parse(localStorage.getItem('supermart_user') || '{}');
+        const customerId = user.customerId || user.id || "";
+
+        // STEP 3: Build order payload
+        const payload = {
+          customerId: customerId,
+          customer: this.userName,
+          mobile: this.phoneNumber,
+          amount: this.totalPrice,
+          discount: 0,
+          savings: 0,
+          date: new Date().toISOString(),
+          amountPaid: this.totalPrice,
+          paymentMode: "upi",
+          orderBy: "in-person",
+          deliveryAddress: this.address,
+          products: this.selectedProduct.map((p: any) => ({
+            productId: p.id || p.productId,
+            name: p.name,
+            price: p.price,
+            qty: p.quantity || 1,
+            total: (p.quantity || 1) * p.price
+          }))
+        };
+
+        // STEP 4: Place order
+        this.supermartService.placeOrder(payload).subscribe({
+          next: () => {
+            this.showToast("Order placed successfully! 🛒", "success");
+            this.clearCart();
+            this.isPanelOpen = false;
+            this.loadOrders();
+          },
+          error: () => {
+            this.showToast('Failed to place order ❌', 'danger');
+          }
+        });
+
+      } else {
+        this.showToast('Payment verification failed ❌', 'danger');
+      }
+    },
+
+    error: (err) => {
+      console.error(err);
+      this.showToast('Payment verification failed ❌', 'danger');
     }
   });
 }
+
+
 
 
 
@@ -307,7 +431,7 @@ offsetY = 0;
     this.address = localStorage.getItem("address") || '';
     this.phoneNumber = localStorage.getItem("phoneNumber") || '';
 
-    setTimeout(() => this.openLoginSheet(), 300);
+    setTimeout(() => this.openLogin(), 300);
 
   }
 
@@ -343,26 +467,76 @@ offsetY = 0;
     }
 
 }
-saveUserData(){
-  debugger
-  if(this.userName !== '' &&
-    this.email !== '' &&
-    this.address !== '' &&
-    this.phoneNumber !== '' &&
-    this.paymentMode !== ''){
-        localStorage.setItem("userName",this.userName);
-        localStorage.setItem("emai",this.email);
-        localStorage.setItem("address",this.address);
-        localStorage.setItem("phoneNumber",this.phoneNumber);
-        this.userName=this.email=this.address=this.phoneNumber='';
-      if(this.paymentModeUI){
 
-    this.pay();
-       }
-    }else{
-      this.showToast('Please fill all required fields');
+orderForUPI: any = null;  // Add this in class
+
+saveUserData() {
+  if (this.userName && this.email && this.address && this.phoneNumber && this.paymentMode) {
+
+    localStorage.setItem("userName", this.userName);
+    localStorage.setItem("email", this.email);
+    localStorage.setItem("address", this.address);
+    localStorage.setItem("phoneNumber", this.phoneNumber);
+
+    const user = JSON.parse(localStorage.getItem('supermart_user') || '{}');
+    const customerId = user?.customerId || user?.id || '';
+
+    const payload = {
+      customerId: customerId,
+      customer: this.userName,
+      mobile: this.phoneNumber,
+      amount: this.totalPrice,
+      discount: 0,
+      savings: 0,
+      date: new Date().toISOString(),
+      amountPaid: this.paymentMode === 'cash' ? this.totalPrice : 0,
+      paymentMode: this.paymentMode,
+      orderBy: "in-person",
+      deliveryAddress: this.address,
+      products: this.selectedProduct.map((p: any) => ({
+        productId: p.id,
+        name: p.name,
+        price: p.price,
+        qty: p.quantity || 1,
+        total: (p.quantity || 1) * p.price
+      }))
+    };
+
+    if (this.paymentMode === 'cash') {
+      this.submitOrderToBackend(payload);
+      return;
     }
+
+    if (this.paymentMode === 'upi') {
+      this.orderForUPI = payload;
+      this.pay();
+      return;
+    }
+  } 
+  else {
+    this.showToast('Please fill all required fields', 'danger');
+  }
 }
+
+submitOrderToBackend(payload: any) {
+  console.log("FINAL ORDER PAYLOAD ➜", payload);
+  this.supermartService.placeOrder(payload).subscribe({
+    next: () => {
+      this.showToast('Order placed successfully! ✅', 'success');
+      this.clearCart();
+      this.isPanelOpen = false;
+
+      // If you want to refresh order list
+      this.loadOrders();
+    },
+    error: (err) => {
+      console.error('Order API Error:', err);
+      this.showToast('Failed to place order ❌', 'danger');
+    }
+  });
+}
+
+
 userName!:string;
 email!:string;
 address!:string;
@@ -421,7 +595,7 @@ this.http.post(
 ).subscribe({
   next: (res: string) => {
     console.log('EmailJS Response:', res);
-    this.successToaster('Order placed successfully ✅');
+    this.showToast('Order placed successfully ✅','success');
     this.selectSuggestion('');
     this.clearCart();
     this.isPanelOpen = false;
@@ -429,7 +603,7 @@ this.http.post(
   },
   error: (err) => {
     console.error('EmailJS Error:', err);
-    this.showToast('Failed to send email ❌');
+    this.showToast('Failed to send email ❌','danger');
   }
 });
 
@@ -559,7 +733,7 @@ selectSuggestion(suggestion: string) {
     p.name?.toLowerCase().includes(suggestion.toLowerCase())
   );
 }
-constructor(private http: HttpClient,private modalCtrl: ModalController, private zone: NgZone,private toastCtrl: ToastController,    private cdr: ChangeDetectorRef) {}
+constructor(private http: HttpClient,private supermartService: SupermartService,private modalCtrl: ModalController, private zone: NgZone,private toastCtrl: ToastController,    private cdr: ChangeDetectorRef) {}
 // async getLocation() {
 //   this.errorMsg = null;
 
@@ -705,24 +879,139 @@ constructor(private http: HttpClient,private modalCtrl: ModalController, private
     this.isLoginOpen = false;
   }
 
-async showToast(message: string) {
+async showToast(message: string, color: string = 'danger') {
   const toast = await this.toastCtrl.create({
     message,
     duration: 2000,
-    position: 'bottom',
-    color: 'danger'
+    position: 'top',
+    color
   });
-  toast.present();
+  await toast.present();
 }
 
-async successToaster(message: string) {
-  const toast = await this.toastCtrl.create({
-    message,
-    duration: 2000,
-    position: 'bottom',
-    color: 'success' 
+openLogin() {
+  this.isModalOpen = true;
+  this.isSignupMode = false;
+  this.isLoginMode = true;
+}
+
+switchToSignup() {
+  this.isSignupMode = true;
+  this.isForgotMode = false;
+  this.isLoginMode = false;
+}
+
+switchToLogin() {
+ this.isSignupMode = false;
+ this.isLoginMode = true;
+  this.isForgotMode = false;
+}
+
+skipLogin() {
+  this.isModalOpen = false;
+  this.showToast('Login skipped','warning');
+}
+
+login() {
+  if (!this.loginData.identifier || !this.loginData.password) {
+    this.showToast("Enter all fields",'danger');
+    return;
+  }
+
+  this.supermartService.login({
+    mobile: this.loginData.identifier,
+    password: this.loginData.password
+  }).subscribe({
+    next: res => {
+      this.showToast("Login success",'success');
+      localStorage.setItem("supermart_user", JSON.stringify(res));
+      this.closeModal();
+    },
+    error: err => {
+      this.showToast("Invalid login",'danger');
+    }
   });
-  toast.present();
+}
+
+closeModal() {
+  this.isModalOpen = false;
+}
+
+
+
+signup() {
+  if (!this.signupData.name || !this.signupData.mobile || !this.signupData.password) {
+    this.showToast("Please fill all details",'danger');
+    return;
+  }
+
+  if (this.signupData.password !== this.signupData.confirm) {
+    this.showToast("Passwords do not match",'danger');
+    return;
+  }
+
+  const payload = {
+    customerId: "CUST" + Math.floor(Math.random() * 9000 + 1000),
+    name: this.signupData.name,
+    mobile: this.signupData.mobile,
+    password: this.signupData.password,
+    address: this.signupData.address,
+    points: 0
+  };
+
+  this.supermartService.addCustomer(payload).subscribe({
+    next: res => {
+      this.showToast("Account created successfully",'success');
+      this.switchToLogin();
+      this.closeModal();
+    },
+    error: err => {
+      this.showToast("Signup failed",'danger');
+    }
+  });
+}
+
+
+openForgotPassword() {
+  this.isSignupMode = false;
+  this.isForgotMode = true;
+  this.isLoginMode = false;
+}
+
+sendResetOTP() {
+  if (!this.forgotData.identifier) {
+    this.showToast("Enter your registered email or phone",'danger');
+    return;
+  }
+
+  // TODO: call API → send OTP
+  console.log("Sending OTP to", this.forgotData.identifier);
+
+  this.otpSent = true;
+}
+
+resetPassword() {
+   if (!this.forgotData.password) {
+    this.showToast("Enter new password",'danger');
+    return;
+  } 
+
+  const body = {
+    mobile: this.forgotData.identifier,   // mobile number
+    newPassword: this.forgotData.password
+  };
+
+  this.supermartService.forgotPassword(body).subscribe({
+    next: (res) => {
+      this.showToast("Password updated successfully!",'success');
+      this.switchToLogin();
+      this.isForgotMode = false;
+    },
+    error: (err) => {
+      console.log(err);
+      this.showToast("Failed to update password",'danger');
+    }
+  });
 }
 
 

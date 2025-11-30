@@ -276,6 +276,14 @@
       <h4 style="margin: 0px 0px 0px 10px" *ngIf="!paymentModeUI">Profile Information</h4>
       <h4 style="margin: 0px 0px 0px 10px" *ngIf="paymentModeUI">Place order</h4>
     </div>
+
+     <div class="panel-head" *ngIf="isOrderHistory">
+      <button class="close-btn" (click)="closeOrderHistory()">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <h4 style="margin: 0px 0px 0px 10px">My Orders</h4>
+    </div>
+
   </div>
   <div
     class="cart-list"
@@ -333,7 +341,7 @@
       </div>
     </div>
     <div class="panel-footer">
-      <div class="total">Total: ${{ totalPrice }}</div>
+      <div class="total">Total: ₹ {{ totalPrice }}</div>
       <div class="cart-buttons">
         <button class="checkout-btn" (click)="onPlaceOrder()">Place order</button>
         <!-- (click)=" pay()" -->
@@ -408,6 +416,36 @@
     </div>
   </div>
 
+  <!-- ORDER HISTORY PANEL -->
+<div class="order-history" 
+     style="flex: 1; overflow: auto; display: flex; flex-direction: column" 
+     *ngIf="isOrderHistory">
+
+  <div class="orders-list" style="padding: 16px;">
+    <div *ngFor="let order of orders" class="order-card">
+      <div class="order-header">
+        <div>
+          <div class="order-id">Order #{{ order.orderId }}</div>
+          <div class="order-date">{{ order.date | date : 'medium' }}</div>
+        </div>
+
+        <div class="order-status" 
+             [class.cancelled]="order.status === 'Cancelled by Customer'">
+          {{ order.status }}
+        </div>
+      </div>
+
+      <div class="order-total">₹ {{ order.amountPaid }}</div>
+
+      <button *ngIf="order.status !== 'Cancelled by Customer'"
+              class="cancel-order-btn"
+              (click)="cancelOrder(order.orderId)">
+        Cancel Order
+      </button>
+    </div>
+  </div>
+</div>
+
 
   <div
     class="profile-details"
@@ -415,7 +453,17 @@
     *ngIf="isProfile || paymentModeUI "
   >
     <div class="user-details">
-      <div class="profile-img" *ngIf="!paymentModeUI">
+
+      <div class="orderHistory" *ngIf="!paymentModeUI">
+         <span (click)="openOrderHistory()">My orders
+          <i class="fa-solid fa-clock-rotate-left"></i>
+         </span>
+         <span (click)="logout()">Logout
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+         </span>
+      </div>
+
+      <!-- <div class="profile-img" *ngIf="!paymentModeUI">
         <img
           src="../../assets/shivan.jpg"
           alt="User Profile"
@@ -425,7 +473,7 @@
       </div>
       <div class="camera" *ngIf="!paymentModeUI">
         <i class="fa-solid fa-camera"></i>
-      </div>
+      </div> -->
       <mat-form-field appearance="outline" class="full-width-field">
         <mat-label>Name</mat-label>
         <input matInput placeholder="Enter your name" [(ngModel)]="userName" />
@@ -452,7 +500,6 @@
 
        <mat-radio-group [(ngModel)]="paymentMode" class="payment-mode-group">
   <mat-radio-button value="cash">Cash</mat-radio-button>
-  <mat-radio-button value="card">Card</mat-radio-button>
   <mat-radio-button value="upi">UPI</mat-radio-button>
 </mat-radio-group>
       </div>
@@ -488,80 +535,102 @@
     </ion-buttons>
 </footer> -->
 
-<ion-modal
-  [isOpen]="isLoginOpen"
-  (didDismiss)="isLoginOpen = false"
-  [initialBreakpoint]="1"
-  [breakpoints]="[0, 1]"
-  cssClass="bottom-sheet-modal"
->
-  <ion-content class="ion-padding">
+<!-- OVERLAY -->
+<div class="overlayDiv" *ngIf="isModalOpen" ></div>
 
-    <ion-segment [(ngModel)]="authMode">
-      <ion-segment-button value="login">
-        <ion-label>Login</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="signup">
-        <ion-label>Sign Up</ion-label>
-      </ion-segment-button>
-    </ion-segment>
+<!-- MAIN MODAL BOX -->
+<div class="auth-box" *ngIf="isModalOpen">
+  
+  <!-- HEADER -->
+  <div class="auth-header">
+    <h2>{{ isSignupMode ? "Create Account" : "Login" }}</h2>
+    <button class="close-btn" (click)="closeModal()">✕</button>
+  </div>
 
-    @if (authMode === 'login') {
-      <div class="form-box">
+  <ng-container *ngIf="isForgotMode">
 
-        <ion-item>
-          <ion-label position="floating">Username / Phone Number</ion-label>
-          <ion-input></ion-input>
-        </ion-item>
+  <div class="form-group" *ngIf="!otpSent">
+    <label>Email / Phone</label>
+    <input type="text" [(ngModel)]="forgotData.identifier" placeholder="Enter registered mobile or email">
+  </div>
 
-        <ion-item class="mt-2">
-          <ion-label position="floating">Password</ion-label>
-          <ion-input type="password"></ion-input>
-        </ion-item>
+  <button class="primary-btn" *ngIf="!otpSent" (click)="sendResetOTP()">Send OTP</button>
 
-        <ion-button expand="block" shape="round" class="mt-3 btn-signUp">
-          LOGIN
-        </ion-button>
+  <div class="otp-section" *ngIf="otpSent">
+    <div class="form-group">
+      <label>Enter OTP</label>
+      <input type="text" [(ngModel)]="forgotData.otp" placeholder="Enter OTP">
+    </div>
 
-        <p class="skip-btn" (click)="authMode = 'signup'">Create new account</p>
+    <div class="form-group">
+      <label>New Password</label>
+      <input type="password" [(ngModel)]="forgotData.password" placeholder="Enter new password">
+    </div>
 
-        <p class="skip-btn" (click)="skip()">Skip →</p>
-      </div>
-    }
+    <button class="primary-btn" (click)="resetPassword()">Reset Password</button>
+  </div>
 
-    @if (authMode === 'signup') {
-      <div class="form-box">
+  <p class="switch-text" (click)="switchToLogin()">Back to Login</p>
 
-        <ion-item>
-          <ion-label position="floating">Username</ion-label>
-          <ion-input></ion-input>
-        </ion-item>
+</ng-container>
 
-        <ion-item class="mt-2">
-          <ion-label position="floating">Phone Number</ion-label>
-          <ion-input type="tel"></ion-input>
-        </ion-item>
+  <!-- ---------------- LOGIN VIEW ---------------- -->
+  <ng-container *ngIf="isLoginMode">
 
-        <ion-item class="mt-2">
-          <ion-label position="floating">Password</ion-label>
-          <ion-input type="password"></ion-input>
-        </ion-item>
+    <div class="form-group">
+      <label>Email / Phone</label>
+      <input type="text" [(ngModel)]="loginData.identifier" placeholder="Enter mobile or email">
+    </div>
 
-        <ion-item class="mt-2">
-          <ion-label position="floating">Confirm Password</ion-label>
-          <ion-input type="password"></ion-input>
-        </ion-item>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" [(ngModel)]="loginData.password" placeholder="Enter password">
+    </div>
 
-        <ion-button expand="block" shape="round" class="mt-3 btn-signUp">
-          SIGN UP
-        </ion-button>
+    <p class="forgot-text" (click)="openForgotPassword()">Forgot Password?</p>
 
-        <p class="switch" (click)="authMode = 'login'">Back to Login</p>
-      </div>
-    }
+    <button class="primary-btn" (click)="login()">Login</button>
 
-    
-  </ion-content>
-</ion-modal>
+    <button class="skip-btn" (click)="skipLogin()">Skip for now</button>
+
+    <p class="switch-text" (click)="switchToSignup()">New user? Create Account</p>
+
+  </ng-container>
+
+  <!-- ---------------- SIGNUP VIEW ---------------- -->
+  <ng-container *ngIf="isSignupMode">
+
+    <div class="form-group">
+      <label>Name</label>
+      <input type="text" [(ngModel)]="signupData.name" placeholder="Enter full name">
+    </div>
+
+    <div class="form-group">
+      <label>Email / Phone</label>
+      <input type="text" [(ngModel)]="signupData.mobile" placeholder="Enter mobile or email">
+    </div>
+
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" [(ngModel)]="signupData.password" placeholder="Create password">
+    </div>
+
+    <div class="form-group">
+      <label>Confirm Password</label>
+      <input type="password" [(ngModel)]="signupData.confirm" placeholder="Confirm password">
+    </div>
+
+    <div class="form-group">
+      <label>Address</label>
+      <textarea [(ngModel)]="signupData.address" placeholder="Enter address"></textarea>
+    </div>
+
+    <button class="primary-btn" (click)="signup()">Create Account</button>
+
+    <p class="switch-text" (click)="switchToLogin()">Already have an account? Login</p>
+
+  </ng-container>
+</div>
+
 
 

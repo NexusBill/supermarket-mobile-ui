@@ -1739,6 +1739,153 @@ ion-item:hover {
 
 // Login css
 
+.overlayDiv {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.55);
+  z-index: 999;
+}
+
+.auth-box {
+  position: fixed;
+  top: 50%; left: 50%;
+  width: 90%; max-width: 380px;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.auth-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+}
+
+.form-group {
+  margin-top: 15px;
+}
+
+.auth-box::ng-deep input, textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  margin-top: 5px;
+}
+
+.primary-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 20px;
+  border: none;
+  background: #8B2A8B;
+  color: #fff;
+  border-radius: 12px;
+  font-size: 18px;
+}
+
+.orderHistory{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.orderHistory span{
+  font-size: 14px;
+  color: #4d4d4d;
+  display:flex;
+  gap:8px;
+  align-items: center;
+  cursor: pointer;
+}
+
+.orderHistory span i{
+  color:#8B2A8B;
+}
+
+.order-card {
+  background: #f2f2f2;
+  padding: 14px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.order-id {
+  font-weight: bold;
+}
+
+.order-date {
+  font-size: 13px;
+  color: #666;
+}
+
+.order-status {
+  font-weight: bold;
+  color: green;
+}
+
+.order-status.cancelled {
+  color: red;
+}
+
+.order-total {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 10px;
+  color:#212121 !important
+}
+
+.cancel-order-btn {
+  width: 100%;
+  background: #ff4444;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  margin-top: 12px;
+}
+
+
+.skip-btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background: #ddd;
+  color: #333;
+  margin-top: 12px;
+  border-radius: 10px;
+}
+
+.switch-text {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 14px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translate(-50%, -48%); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
+}
 
 
 .bottom-sheet-modal {
