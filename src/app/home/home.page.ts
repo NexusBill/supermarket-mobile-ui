@@ -220,17 +220,17 @@ closeOrderHistory() {
 }
 
 loadOrders() {
-  if(this.userDetails.customerId===undefined || this.userDetails.customerId===null || this.userDetails.customerId===''){
-   window.alert("Please login again.");
-    return;
-  }
- this.supermartService.getOrders(this.userDetails.customerId).subscribe({
+  // if(this.userDetails.customerId===undefined || this.userDetails.customerId===null || this.userDetails.customerId===''){
+  //  window.alert("Please login again.");
+  //   return;
+  // }
+ this.supermartService.getOrders(1234).subscribe({
     next: (res: any) => {
         debugger;
       this.orders = res;
     },
     error: () => {
-      this.showToast("Failed to load orders",'danger');
+      this.showCustomToast("Failed to load orders",'danger');
     }
   });
 }
@@ -239,18 +239,18 @@ cancelOrder(id: string) {
 
   this.supermartService.cancelOrder(id).subscribe({
     next: () => {
-      this.showToast("Order cancelled",'success');
+      this.showCustomToast("Order cancelled",'success');
       this.loadOrders();
     },
     error: () => {
-      this.showToast("Unable to cancel",'danger');
+      this.showCustomToast("Unable to cancel",'danger');
     }
   });
 }
 
 logout() {
   localStorage.clear();
-  this.showToast("Logged out",'success');
+  this.showCustomToast("Logged out",'success');
   this.isProfile = false;
   this.togglePanel();
 }
@@ -283,7 +283,7 @@ logout() {
     const amountInPaise = Math.round(this.totalPrice * 100);
 
   if (amountInPaise <= 0) {
-     this.showToast('Cart is empty!','danger');
+     this.showCustomToast('Cart is empty!','danger');
     return;
   }
 
@@ -321,7 +321,7 @@ logout() {
       const rzp = new (window as any).Razorpay(options);
 
     rzp.on("payment.failed", (err: any) => {
-      this.showToast('Payment Failed! Please try again.','danger');
+      this.showCustomToast('Payment Failed! Please try again.','danger');
       console.error(err);
     });
 
@@ -340,7 +340,7 @@ verifyPayment(response: any) {
 
       if (res.success) {
 
-        this.showToast('Payment Verified Successfully! ✅', 'success');
+        this.showCustomToast('Payment Verified Successfully! ✅', 'success');
         this.isPanelOpen=false;
         // STEP 2: Get customerId from logged-in user
         const user = JSON.parse(localStorage.getItem('supermart_user') || '{}');
@@ -371,24 +371,24 @@ verifyPayment(response: any) {
         // STEP 4: Place order
         this.supermartService.placeOrder(payload).subscribe({
           next: () => {
-            this.showToast("Order placed successfully! 🛒", "success");
+            this.showCustomToast("Order placed successfully! 🛒", "success");
             this.clearCart();
             this.isPanelOpen = false;
             this.loadOrders();
           },
           error: () => {
-            this.showToast('Failed to place order ❌', 'danger');
+            this.showCustomToast('Failed to place order ❌', 'danger');
           }
         });
 
       } else {
-        this.showToast('Payment verification failed ❌', 'danger');
+        this.showCustomToast('Payment verification failed ❌', 'danger');
       }
     },
 
     error: (err) => {
       console.error(err);
-      this.showToast('Payment verification failed ❌', 'danger');
+      this.showCustomToast('Payment verification failed ❌', 'danger');
     }
   });
 }
@@ -426,6 +426,9 @@ verifyPayment(response: any) {
   // }
 userDetails: any = {};
   ngOnInit() {
+    
+    setTimeout(() => this.openLogin(), 300);
+
     this.resetStates();
     this.getProducts();
     this.getLocation();
@@ -435,8 +438,6 @@ userDetails: any = {};
     this.address = localStorage.getItem("address") || '';
     this.phoneNumber = localStorage.getItem("phoneNumber") || '';
    this.userDetails= JSON.parse(localStorage.getItem("supermart_user") || '');
-
-    setTimeout(() => this.openLogin(), 300);
 
   }
 
@@ -519,7 +520,7 @@ saveUserData() {
     }
   } 
   else {
-    this.showToast('Please fill all required fields', 'danger');
+    this.showCustomToast('Please fill all required fields', 'danger');
   }
 }
 
@@ -527,7 +528,7 @@ submitOrderToBackend(payload: any) {
   console.log("FINAL ORDER PAYLOAD ➜", payload);
   this.supermartService.placeOrder(payload).subscribe({
     next: () => {
-      this.showToast('Order placed successfully! ✅', 'success');
+      this.showCustomToast('Order placed successfully! ✅', 'success');
       this.clearCart();
       this.isPanelOpen = false;
 
@@ -536,7 +537,7 @@ submitOrderToBackend(payload: any) {
     },
     error: (err) => {
       console.error('Order API Error:', err);
-      this.showToast('Failed to place order ❌', 'danger');
+      this.showCustomToast('Failed to place order ❌', 'danger');
     }
   });
 }
@@ -600,7 +601,7 @@ this.http.post(
 ).subscribe({
   next: (res: string) => {
     console.log('EmailJS Response:', res);
-    this.showToast('Order placed successfully ✅','success');
+    this.showCustomToast('Order placed successfully ✅','success');
     this.selectSuggestion('');
     this.clearCart();
     this.isPanelOpen = false;
@@ -608,7 +609,7 @@ this.http.post(
   },
   error: (err) => {
     console.error('EmailJS Error:', err);
-    this.showToast('Failed to send email ❌','danger');
+    this.showCustomToast('Failed to send email ❌','danger');
   }
 });
 
@@ -884,15 +885,50 @@ constructor(private http: HttpClient,private supermartService: SupermartService,
     this.isLoginOpen = false;
   }
 
-async showToast(message: string, color: string = 'danger') {
-  const toast = await this.toastCtrl.create({
-    message,
-    duration: 2000,
-    position: 'top',
-    color
-  });
-  await toast.present();
+// async showCustomToast(message: string, color: string = 'danger') {
+//   const toast = await this.toastCtrl.create({
+//     message,
+//     duration: 2000,
+//     position: 'top',
+//     cssClass: "forceToast",
+//     color
+//   });
+//   await toast.present();
+// }
+
+showDetails = true;
+
+toggleDetails() {
+  this.showDetails = !this.showDetails;
 }
+
+
+showCustomToast(message: string, type: 'success' | 'danger' | 'warning' | 'info' = 'info') {
+
+  const toast = document.getElementById('custom-toast');
+  const msg = document.getElementById('toast-message');
+
+  if (!toast || !msg) return;
+
+  msg.textContent = message;
+
+  // Remove old type classes
+  toast.classList.remove('toast-success', 'toast-danger', 'toast-warning', 'toast-info');
+
+  // Add the new type
+  toast.classList.add(`toast-${type}`);
+
+  // Show toast
+  toast.classList.add('toast-show');
+  toast.classList.remove('toast-hidden');
+
+  // Hide after 2.5 sec
+  setTimeout(() => {
+    toast.classList.remove('toast-show');
+    toast.classList.add('toast-hidden');
+  }, 2500);
+}
+
 
 openLogin() {
   this.isModalOpen = true;
@@ -914,12 +950,12 @@ switchToLogin() {
 
 skipLogin() {
   this.isModalOpen = false;
-  this.showToast('Login skipped','warning');
+  this.showCustomToast('Login skipped','warning');
 }
 
 login() {
   if (!this.loginData.identifier || !this.loginData.password) {
-    this.showToast("Enter all fields",'danger');
+    this.showCustomToast("Enter all fields",'danger');
     return;
   }
 
@@ -928,12 +964,12 @@ login() {
     password: this.loginData.password
   }).subscribe({
     next: res => {
-      this.showToast("Login success",'success');
+      this.showCustomToast("Login success",'success');
       localStorage.setItem("supermart_user", JSON.stringify(res));
       this.closeModal();
     },
     error: err => {
-      this.showToast("Invalid login",'danger');
+      this.showCustomToast("Invalid login",'danger');
     }
   });
 }
@@ -946,12 +982,12 @@ closeModal() {
 
 signup() {
   if (!this.signupData.name || !this.signupData.mobile || !this.signupData.password) {
-    this.showToast("Please fill all details",'danger');
+    this.showCustomToast("Please fill all details",'danger');
     return;
   }
 
   if (this.signupData.password !== this.signupData.confirm) {
-    this.showToast("Passwords do not match",'danger');
+    this.showCustomToast("Passwords do not match",'danger');
     return;
   }
 
@@ -966,12 +1002,12 @@ signup() {
 
   this.supermartService.addCustomer(payload).subscribe({
     next: res => {
-      this.showToast("Account created successfully",'success');
+      this.showCustomToast("Account created successfully",'success');
       this.switchToLogin();
       this.closeModal();
     },
     error: err => {
-      this.showToast("Signup failed",'danger');
+      this.showCustomToast("Signup failed",'danger');
     }
   });
 }
@@ -985,7 +1021,7 @@ openForgotPassword() {
 
 sendResetOTP() {
   if (!this.forgotData.identifier) {
-    this.showToast("Enter your registered email or phone",'danger');
+    this.showCustomToast("Enter your registered email or phone",'danger');
     return;
   }
 
@@ -997,7 +1033,7 @@ sendResetOTP() {
 
 resetPassword() {
    if (!this.forgotData.password) {
-    this.showToast("Enter new password",'danger');
+    this.showCustomToast("Enter new password",'danger');
     return;
   } 
 
@@ -1008,13 +1044,13 @@ resetPassword() {
 
   this.supermartService.forgotPassword(body).subscribe({
     next: (res) => {
-      this.showToast("Password updated successfully!",'success');
+      this.showCustomToast("Password updated successfully!",'success');
       this.switchToLogin();
       this.isForgotMode = false;
     },
     error: (err) => {
       console.log(err);
-      this.showToast("Failed to update password",'danger');
+      this.showCustomToast("Failed to update password",'danger');
     }
   });
 }

@@ -420,99 +420,170 @@
 <div class="order-history" 
      style="flex: 1; overflow: auto; display: flex; flex-direction: column" 
      *ngIf="isOrderHistory">
+<div class="orders-list" style="padding: 16px;">
+  <div *ngFor="let order of orders" class="order-card-modern">
 
-  <div class="orders-list" style="padding: 16px;">
-    <div *ngFor="let order of orders" class="order-card">
-      <div class="order-header">
-        <div>
-          <div class="order-id">Order #{{ order.orderId }}</div>
-          <div class="order-date">{{ order.date | date : 'medium' }}</div>
-        </div>
-
-        <div class="order-status" 
-             [class.cancelled]="order.status === 'Cancelled by Customer'">
-          {{ order.status }}
-        </div>
+    <!-- Header -->
+    <div class="order-modern-header">
+      <div>
+        <div class="order-id">Order #{{ order.orderId }}</div>
+        <div class="order-date">{{ order.date | date : 'medium' }}</div>
       </div>
 
-      <div class="order-total">₹ {{ order.amountPaid }}</div>
+      <div class="order-status"
+           [ngClass]="{
+              'cancelled': order.status === 'cancelled',
+              'completed': order.status === 'delivered'
+           }">
+        {{ order.status }}
+      </div>
+    </div>
 
-      <button *ngIf="order.status !== 'Cancelled by Customer'"
-              class="cancel-order-btn"
-              (click)="cancelOrder(order.orderId)">
-        Cancel Order
-      </button>
+    <!-- Stepper -->
+    <div class="order-stepper" *ngIf="order.status != 'pending' && order.status != 'cancelled' && order.status != 'delivered'">
+
+      <!-- PICKED -->
+      <div class="step" [class.active]="order.status !== 'pending'">
+        <div class="circle">
+          <ng-container *ngIf="order.status === 'picked' 
+                            || order.status === 'packed' 
+                            || order.status === 'delivered'|| order.status === 'Out for delivery'; else number1">
+            ✔
+          </ng-container>
+          <ng-template #number1>1</ng-template>
+        </div>
+        <span>Picked</span>
+      </div>
+
+      <div class="line"
+           [class.active]="order.status === 'packed' 
+                        || order.status === 'delivered'|| order.status === 'Out for delivery'"></div>
+
+      <!-- PACKED -->
+      <div class="step" [class.active]="order.status === 'packed' 
+                                     || order.status === 'delivered'|| order.status === 'Out for delivery'">
+        <div class="circle">
+          <ng-container *ngIf="order.status === 'packed' 
+                            || order.status === 'delivered'|| order.status === 'Out for delivery'; else number2">
+            ✔
+          </ng-container>
+          <ng-template #number2>2</ng-template>
+        </div>
+        <span>Packed</span>
+      </div>
+
+      <div class="line"
+           [class.active]="order.status === 'delivered'"></div>
+
+      <!-- DELIVERED -->
+      <div class="step" [class.active]="order.status === 'delivered'">
+        <div class="circle">
+          <ng-container *ngIf="order.status === 'delivered'; else number3">
+            ✔
+          </ng-container>
+          <ng-template #number3>3</ng-template>
+        </div>
+        <span>Delivered</span>
+      </div>
+
+    </div>
+
+    <!-- Amount -->
+    <div class="order-total">₹ {{ order.amountPaid }}</div>
+
+    <!-- Cancel Button -->
+    <button 
+      *ngIf="order.status == 'pending'"
+      class="cancel-order-btn"
+      (click)="cancelOrder(order.orderId)">
+      Cancel Order
+    </button>
+
+  </div>
+</div>
+
+</div>
+
+
+<div
+  class="profile-details"
+  style="flex: 1; overflow: auto; display: flex; flex-direction: column"
+  *ngIf="isProfile || paymentModeUI"
+>
+  <div class="user-details">
+
+    <!-- SHOW AVATAR ONLY IF NOT PAYMENT MODE -->
+    <div class="profile-header" *ngIf="!paymentModeUI">
+      <div class="avatar">
+        <i class="fa-solid fa-user"></i>
+      </div>
+    </div>
+
+    <!-- COLLAPSIBLE SECTION -->
+    <div class="collapsible-container">
+      <div class="collapsible-header" (click)="toggleDetails()">
+        <span>My Details</span>
+        <i class="fa-solid" [ngClass]="showDetails ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+      </div>
+
+      <div class="collapsible-body" *ngIf="showDetails">
+        <mat-form-field appearance="outline" class="full-width-field">
+          <mat-label>Name</mat-label>
+          <input matInput placeholder="Enter your name" [(ngModel)]="userName" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width-field">
+          <mat-label>Email</mat-label>
+          <input matInput placeholder="Enter your gmail" [(ngModel)]="email" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width-field">
+          <mat-label>Phone</mat-label>
+          <input matInput placeholder="Enter your phone no" [(ngModel)]="phoneNumber" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width-field">
+          <mat-label>Delivery Address</mat-label>
+          <input matInput placeholder="Enter your address" [(ngModel)]="address" />
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- ORDERS + LOGOUT ONLY IF NOT PAYMENT MODE -->
+<div class="list-settings" *ngIf="!paymentModeUI">
+  <div class="list-item" (click)="openOrderHistory()">
+    <span>My Orders</span>
+    <i class="fa-solid fa-chevron-right"></i>
+  </div>
+
+  <div class="list-item logout" (click)="logout()">
+    <span>Logout</span>
+    <i class="fa-solid fa-chevron-right"></i>
+  </div>
+</div>
+
+
+    <!-- PAYMENT MODE UI -->
+    <div class="payment-container" *ngIf="paymentModeUI">
+      <div class="payment-title">Payment Mode</div>
+
+      <mat-radio-group [(ngModel)]="paymentMode" class="payment-mode-group">
+        <mat-radio-button value="cash">Cash</mat-radio-button>
+        <mat-radio-button value="upi">UPI</mat-radio-button>
+      </mat-radio-group>
+    </div>
+
+  </div>
+
+  <div class="panel-footer">
+    <div class="cart-buttons">
+      <button class="checkout-btn" (click)="saveUserData()">Save</button>
+      <button class="checkout-btn" (click)="clearCart()">Clear</button>
     </div>
   </div>
 </div>
 
 
-  <div
-    class="profile-details"
-    style="flex: 1; overflow: auto; display: flex; flex-direction: column"
-    *ngIf="isProfile || paymentModeUI "
-  >
-    <div class="user-details">
-
-      <div class="orderHistory" *ngIf="!paymentModeUI">
-         <span (click)="openOrderHistory()">My orders
-          <i class="fa-solid fa-clock-rotate-left"></i>
-         </span>
-         <span (click)="logout()">Logout
-          <i class="fa-solid fa-arrow-right-from-bracket"></i>
-         </span>
-      </div>
-
-      <!-- <div class="profile-img" *ngIf="!paymentModeUI">
-        <img
-          src="../../assets/shivan.jpg"
-          alt="User Profile"
-          class="profile-image"
-          style="border-radius: 50%"
-        />
-      </div>
-      <div class="camera" *ngIf="!paymentModeUI">
-        <i class="fa-solid fa-camera"></i>
-      </div> -->
-      <mat-form-field appearance="outline" class="full-width-field">
-        <mat-label>Name</mat-label>
-        <input matInput placeholder="Enter your name" [(ngModel)]="userName" />
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width-field">
-        <mat-label>Email</mat-label>
-        <input matInput placeholder="Enter your gmail" [(ngModel)]="email" />
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width-field">
-        <mat-label>Phone</mat-label>
-        <input matInput placeholder="Enter your phone no" [(ngModel)]="phoneNumber" />
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width-field">
-        <mat-label>Delivery Address</mat-label>
-        <input
-          matInput
-          placeholder="Enter your address"
-          [(ngModel)]="address"
-        />
-      </mat-form-field>
-      
-      <div class="payment-container" *ngIf="paymentModeUI">
-        <div class="payment-title">Payment Mode</div>
-
-       <mat-radio-group [(ngModel)]="paymentMode" class="payment-mode-group">
-  <mat-radio-button value="cash">Cash</mat-radio-button>
-  <mat-radio-button value="upi">UPI</mat-radio-button>
-</mat-radio-group>
-      </div>
-
-    </div>
-
-          <div class="panel-footer">
-        <div class="cart-buttons">
-          <button class="checkout-btn" (click)="saveUserData()">Save</button>
-          <button class="checkout-btn" (click)="clearCart()">Clear</button>
-        </div>
-      </div>
-  </div>
 </div>
 
 <div class="overlay" [class.show]="isPanelOpen" (click)="togglePanel()"></div>

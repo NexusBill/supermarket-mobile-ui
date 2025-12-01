@@ -3,7 +3,51 @@
   padding: 10px;
   --offset-top: 0px !important;
     --offset-bottom: 0px !important;
+    height: 56% !important;
 }
+
+.profile-header {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.avatar {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: #f1f1f1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 50px;
+  color: #555;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.collapsible-container {
+  width: 100%;
+  margin-top: 10px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+}
+
+.collapsible-header {
+  background: #f8f8f8;
+  padding: 12px 16px;
+  font-size: 17px;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.collapsible-body {
+  padding: 12px 10px;
+  background: #fff;
+}
+
 
 .custom-header {
   background: linear-gradient(90deg, #ffffff, #f8f8f8);
@@ -1764,6 +1808,7 @@ ion-item:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color:#212121 !important;
 }
 
 .close-btn {
@@ -1774,6 +1819,9 @@ ion-item:hover {
 
 .form-group {
   margin-top: 15px;
+  label{
+    color: #212121 !important;
+  }
 }
 
 .auth-box::ng-deep input, textarea {
@@ -1782,6 +1830,15 @@ ion-item:hover {
   border-radius: 10px;
   border: 1px solid #ccc;
   margin-top: 5px;
+  color: #4d4d4d !important;
+}
+
+.auth-box::ng-deep input, textarea::placeholder{
+  color: #a6a6a6 !important;
+}
+
+.forgot-text{
+  color: #212121 !important;
 }
 
 .primary-btn {
@@ -1812,55 +1869,114 @@ ion-item:hover {
   cursor: pointer;
 }
 
+.order-id{
+  color: #4d4d4d;
+}
+
+.order-date{
+  color: #4d4d4d;
+}
+
 .orderHistory span i{
   color:#8B2A8B;
 }
 
-.order-card {
-  background: #f2f2f2;
-  padding: 14px;
-  border-radius: 12px;
-  margin-bottom: 14px;
+.order-card-modern {
+  background: #fff;
+  padding: 16px;
+  border-radius: 16px;
+  margin-bottom: 18px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  border: 1px solid #eee;
 }
 
-.order-header {
+.order-modern-header {
   display: flex;
   justify-content: space-between;
-}
-
-.order-id {
-  font-weight: bold;
-}
-
-.order-date {
-  font-size: 13px;
-  color: #666;
+  align-items: center;
 }
 
 .order-status {
-  font-weight: bold;
-  color: green;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #e7f3ff;
+  color: #0078ff;
+}
+
+.order-status.completed {
+  background: #d4f8d4 !important;
+  color: #098c25 !important;
 }
 
 .order-status.cancelled {
-  color: red;
+  background: #ffe4e4 !important;
+  color: #d00000 !important;
+}
+
+/* --- Stepper --- */
+.order-stepper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 18px 0;
+}
+
+.step {
+  text-align: center;
+}
+
+.circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #bbb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  color: #777;
+}
+
+.step.active .circle {
+  background: #4cd964;   /* GREEN like iOS success */
+  border-color: #4cd964;
+  color: #fff;
+}
+
+.line {
+     flex: 1;
+    height: 3px;
+    background: #ddd;
+    margin: 0 4px; 
+    border-radius: 2px;
+    margin-top: -16px;
+}
+
+.line.active {
+  background: #4cd964; /* Green line */
 }
 
 .order-total {
   font-size: 18px;
   font-weight: bold;
-  margin-top: 10px;
-  color:#212121 !important
+  margin-top: 22px;
+  color: #212121;
 }
 
 .cancel-order-btn {
   width: 100%;
-  background: #ff4444;
-  color: white;
-  padding: 10px;
-  border-radius: 8px;
+  margin-top: 25px;
+  background: #ff3b30;
+  color: #fff;
+  padding: 10px 14px;
   border: none;
-  margin-top: 12px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
 }
 
 
@@ -1880,6 +1996,7 @@ ion-item:hover {
   font-size: 14px;
   text-decoration: underline;
   cursor: pointer;
+  color: #212121 !important;
 }
 
 @keyframes fadeIn {
@@ -1970,4 +2087,29 @@ ion-segment-button {
 
 .full-width-field{
   width: 100%;
+}
+
+.list-settings {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-top: 20px;
+  border: 1px solid #e5e5e5;
+}
+
+.list-item {
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  font-weight: 500;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.list-item:last-child {
+  border: none;
+}
+
+.list-item.logout {
+  color: #d9534f;
 }
