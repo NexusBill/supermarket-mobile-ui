@@ -47,8 +47,10 @@ export class SupermartService {
   }
 
   // Cancel Order
-  cancelOrder(orderId: string, body: any): Observable<any> {
-    return this.http.put(`${this.baseUrl}/orders/${orderId}`, body);
+  cancelOrder(orderId: string): Observable<any> {
+    return this.http.put(`${this.baseUrl}/orders/status-update/${orderId}`, {
+      status: "cancelled"
+    });
   }
 
 }

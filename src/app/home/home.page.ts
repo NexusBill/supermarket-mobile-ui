@@ -236,9 +236,8 @@ loadOrders() {
 }
 
 cancelOrder(id: string) {
-  const body = { status: "Cancelled by Customer" };
 
-  this.supermartService.cancelOrder(id, body).subscribe({
+  this.supermartService.cancelOrder(id).subscribe({
     next: () => {
       this.showToast("Order cancelled",'success');
       this.loadOrders();
