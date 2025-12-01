@@ -42,8 +42,8 @@ export class SupermartService {
   }
 
   // Get Orders
-  getOrders(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/orders`);
+  getOrders(id:number): Observable<any> {
+    return this.http.get(`${this.baseUrl}/orders/order-by-customers/${id}`);
   }
 
   // Cancel Order

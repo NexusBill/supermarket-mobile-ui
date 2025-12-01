@@ -220,8 +220,13 @@ closeOrderHistory() {
 }
 
 loadOrders() {
- this.supermartService.getOrders().subscribe({
+  if(this.userDetails.customerId===undefined || this.userDetails.customerId===null || this.userDetails.customerId===''){
+   window.alert("Please login again.");
+    return;
+  }
+ this.supermartService.getOrders(this.userDetails.customerId).subscribe({
     next: (res: any) => {
+        debugger;
       this.orders = res;
     },
     error: () => {
@@ -420,7 +425,7 @@ verifyPayment(response: any) {
   //     top: footer.style.top
   //   }));
   // }
-
+userDetails: any = {};
   ngOnInit() {
     this.resetStates();
     this.getProducts();
@@ -430,6 +435,7 @@ verifyPayment(response: any) {
     this.email = localStorage.getItem("emai") || '';
     this.address = localStorage.getItem("address") || '';
     this.phoneNumber = localStorage.getItem("phoneNumber") || '';
+   this.userDetails= JSON.parse(localStorage.getItem("supermart_user") || '');
 
     setTimeout(() => this.openLogin(), 300);
 
