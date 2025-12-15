@@ -100,9 +100,12 @@
 
 <ion-content
   class="contentClass"
-  style="overflow-y: auto !important; --background: fff !important"
-  fullscreen="true"
+  style="overflow-y: hidden !important; --background: fff !important"
+  fullscreen="false"
 >
+
+ <div class="scrollDiv" (scroll)="onProductScroll($event)"> 
+ 
   <div class="bg" *ngIf="showAlert">
     <div class="backdrop" (click)="alertEnabler()"></div>
     <!-- Alert Container -->
@@ -134,8 +137,7 @@
     <span>Flash Sale</span>
     <span>New Arrival</span>
   </div>
-
-  <div class="product-grid">
+  <div class="product-grid" >
     <div *ngFor="let item of products" class="product-card">
       <div class="like" (click)="addWishlist(item)">
         <i
@@ -150,14 +152,14 @@
         ></i>
       </div>
 
-      <img src="../../assets/vege.jpg" alt="product" class="product-image" />
+      <img src="https://res.cloudinary.com/djbelgg05/image/upload/{{ item.name }}.jpg" alt="product" class="product-image" />
 
       <div class="product-content">
         <h3 style="color: olive">{{ item.name }}</h3>
         <p class="weight">{{ item.UnitDesc }}</p>
 
         <div class="price-row">
-          <span class="price" style="width: 30%">₹ {{ item.MRP }}</span>
+          <span class="price" style="width: 30%">₹ {{ item.price }}</span>
 
           <div class="add-btn" style="width: 70%" *ngIf="!item.isAdded">
             <button class="add-button" (click)="onAdd(item)">Add</button>
@@ -187,8 +189,12 @@
       </div>
     </div>
   </div>
+  </div>
+  <!-- Alert Container -->
+</ion-content>
 
-  <div class="footer draggable" cdkDrag>
+
+  <ion-footer class="footer draggable" cdkDrag>
     <button
       class="nav-btn"
       [ngClass]="{ 'active': isWishlist }"
@@ -247,12 +253,7 @@
         <span class="nav-label">Categories</span>
       </button> -->
     <!-- Wishlist -->
-  </div>
-
-  <!-- Backdrop -->
-
-  <!-- Alert Container -->
-</ion-content>
+  </ion-footer>
 
 <!-- SIDE PANEL (slides in/out) -->
 <div class="side-panel" [class.open]="isPanelOpen">
@@ -307,7 +308,7 @@
             <p class="weight">{{ item.weight }}</p>
 
             <div class="price-row">
-              <span class="price" style="width: 30%">${{ item.price }}</span>
+              <span class="price" style="width: 30%">₹ {{ item.price }}</span>
 
               <div class="add-btn" style="width: 70%" *ngIf="!item.isAdded">
                 <button class="add-button" (click)="onAdd(item)">Add</button>
@@ -372,7 +373,7 @@
             <p class="weight">{{ item.weight }}</p>
 
             <div class="price-row">
-              <span class="price" style="width: 30%">${{ item.price }}</span>
+              <span class="price" style="width: 30%">₹ {{ item.price }}</span>
 
               <div class="add-btn" style="width: 70%" *ngIf="!item.isAdded">
                 <button class="add-button" (click)="onAdd(item)">Add</button>
@@ -406,7 +407,7 @@
       </div>
     </div>
     <div class="panel-footer">
-      <div class="total">Total: ${{ totalPrice }}</div>
+      <div class="total">Total: ₹ {{ totalPrice }}</div>
       <div class="cart-buttons">
         <button class="checkout-btn">Payment</button>
         <button class="checkout-btn" (click)="clearCart()">

@@ -155,18 +155,43 @@ resetStates(){
   this.paymentModeUI= false;
 }
 products: Product[] = [];
+page = 1;
+limit = 1000;
+loadingMore = false;
+allLoaded = false;
 
+onProductScroll(event: any) {
+  const target = event.target;
 
-getProducts() {
+  const scrollPosition = target.scrollTop + target.clientHeight;
+  const scrollHeight = target.scrollHeight;
+  if (scrollHeight - scrollPosition < 200) {
+    this.getProducts();
+  }
+}
+
+ getProducts() {
+  if (this.loadingMore || this.allLoaded) return;
+
+  this.loadingMore = true;
+
   this.http
-    .get("https://supermartspring.vercel.app/api/nexus_supermart/products?page=1&limit=10")
-    .subscribe((res: any) => {
-      debugger;
+    .get<any>(
+      `https://supermartspring.vercel.app/api/nexus_supermart/products?page=${this.page}&limit=${this.limit}`
+    )
+    .subscribe(res => {
+      if (!res?.data?.length) {
+        this.allLoaded = true;
+      } else {
+        this.products = [...this.products, ...res.data];
+        this.page++;
+      }
 
-      this.products = res.data; 
-      this.productsBackup = [...this.products];
+      this.loadingMore = false;
     });
 }
+
+
 paymentModeUI:boolean=false;
 
 onPlaceOrder() {
@@ -440,8 +465,6 @@ userDetails: any = {};
    this.userDetails= JSON.parse(localStorage.getItem("supermart_user") || '');
 
   }
-
-
 
 
 
