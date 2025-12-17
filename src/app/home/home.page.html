@@ -90,9 +90,9 @@
 <div class="content">
   <div class="categories-scroll">
     <div class="category" *ngFor="let cat of suggestions">
-      <div class="cat-displayer" (click)="selectSuggestion(cat)">
+      <div class="cat-displayer" (click)="selectSuggestion(cat.name)">
         <img src="../../assets/shapes.svg" />
-        <p>{{cat}}</p>
+        <p>{{cat.name}}</p>
       </div>
     </div>
   </div>

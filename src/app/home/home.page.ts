@@ -485,6 +485,7 @@ userDetails: any = {};
     this.resetStates();
     this.getProducts();
     this.getLocation();
+    this.getCategories();
     this.isHome = true;
     this.userName = localStorage.getItem("userName") || '';
     this.email = localStorage.getItem("emai") || '';
@@ -687,7 +688,7 @@ this.http.post(
       name: 'Kaviyarasan',
       email: ' kahjhj@gail.com'
     }
-  suggestions: string[] = [
+  suggestions: any[] = [
     'Dairy', 'Fruits', 'Instant Food', 'Bakery', 'Grains', 'Snacks', 'Vegetables', 'Meat', 'Daily Needs', 'Pulses', 'Beverages', 'Condiments', 'Breakfast', 'General'
   ];
 
@@ -758,7 +759,11 @@ getCityByAPI(lat: number, lng: number) {
     });
   }
 
-
+getCategories() {
+  this.http.get<any>('https://supermartspring.vercel.app/api/nexus_supermart/categories').subscribe(res => {
+    this.suggestions = res.data || [];
+  });
+}
   onSearchChange() {
     debugger;
     const value = this.searchText.toLowerCase().trim();
