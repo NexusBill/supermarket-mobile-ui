@@ -172,6 +172,15 @@ onProductScroll(event: any) {
     this.getProducts();
   }
 }
+getSearchedProducts(query: string) {
+  this.http
+    .get<any>(
+      `https://supermartspring.vercel.app/api/nexus_supermart/products/search?query=${query}`
+    )
+    .subscribe(res => {
+      this.filteredSuggestions = res.data || [];
+    });
+}
 
 
 getProducts() {
