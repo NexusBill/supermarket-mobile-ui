@@ -999,6 +999,10 @@ ion-card-content {
   padding: 16px 9px 1px 0px;
 }
 
+.side-panel::ng-deep .close-btn{
+  color: #fff !important;
+}
+
 @media (max-width: 768px) {
 
       .brand-section{
@@ -1738,6 +1742,15 @@ ion-item:hover {
   color: #7a7a7a;
   cursor: pointer;
 }
+
+.close-btnAlt{
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #7a7a7a;
+  cursor: pointer;
+}
+
 .no-item{
   text-align: center;
   margin-top: 50px;
@@ -2103,7 +2116,7 @@ ion-segment-button {
 .payment-title{
     font-size: 16px;
     color: #4d4d4d;
-    padding-bottom: 7px !important;
+    padding-bottom: 17px !important;
     margin-top: 20px;
 }
 
@@ -2157,4 +2170,48 @@ ion-spinner {
   width: 40px;
   height: 40px;
   color: #6b1b6c;
+}
+
+/* Payment Mode Section */
+.paymode-container {
+  display: flex;
+  gap: 20px;
+
+  .paymode-card {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    i {
+      font-size: 18px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .fa-credit-card{
+      color: blue;
+    }
+
+    .fa-money-bill-wave{
+      color: green;
+    }
+
+    &.selected {
+      border-color: #8b2a8b;
+      background: #f9f0fa;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+  }
 }

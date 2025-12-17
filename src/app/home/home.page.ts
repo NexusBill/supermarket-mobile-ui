@@ -477,6 +477,14 @@ verifyPayment(response: any) {
   //     top: footer.style.top
   //   }));
   // }
+
+// const paymodeCards: NodeListOf<HTMLElement> = document.querySelectorAll('.paymode-card');
+selectedMode: 'upi' | 'cash' = 'upi'; 
+ selectMode(mode: 'upi' | 'cash') {
+    this.selectedMode = mode;
+    this.paymentMode = this.selectedMode;
+  }
+
 userDetails: any = {};
   ngOnInit() {
     

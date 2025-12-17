@@ -16,7 +16,6 @@
           <div class="location-selector">
             <span class="location-name"> {{ city }}</span>
             <span class="location-name" *ngIf="city">,{{ postalCode }}</span>
-            
           </div>
         </div>
       </div>
@@ -60,29 +59,29 @@
 
   <!-- Search Bar -->
   <div class="search-containerWrap">
-  <div class="search-container">
-    <input
-      type="text"
-      class="search-input"
-      placeholder="Search 18000+ products"
-      [(ngModel)]="searchText"
-      (input)="onSearchChange()"
-    />
+    <div class="search-container">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search 18000+ products"
+        [(ngModel)]="searchText"
+        (input)="onSearchChange()"
+      />
 
-    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+      <i class="fa-solid fa-magnifying-glass search-icon"></i>
 
-    <!-- Suggestion Box -->
-    <div class="suggestion-box" *ngIf="filteredSuggestions.length > 0">
-      <div
-        class="suggestion-item"
-        *ngFor="let suggestion of filteredSuggestions"
-        (click)="selectSuggestion(suggestion.name)"
-      >
-        <i class="fa-solid fa-clock-rotate-left icon"></i>
-        <span class="text">{{ suggestion.name }}</span>
+      <!-- Suggestion Box -->
+      <div class="suggestion-box" *ngIf="filteredSuggestions.length > 0">
+        <div
+          class="suggestion-item"
+          *ngFor="let suggestion of filteredSuggestions"
+          (click)="selectSuggestion(suggestion.name)"
+        >
+          <i class="fa-solid fa-clock-rotate-left icon"></i>
+          <span class="text">{{ suggestion.name }}</span>
+        </div>
       </div>
     </div>
-  </div>
   </div>
 </ion-header>
 
@@ -103,158 +102,167 @@
   style="overflow-y: hidden !important; --background: fff !important"
   fullscreen="false"
 >
-
- <div class="scrollDiv" (scroll)="onProductScroll($event)"> 
- 
-  <div class="bg" *ngIf="showAlert">
-    <div class="backdrop" (click)="alertEnabler()"></div>
-    <!-- Alert Container -->
-    <div class="alert-container" id="alertContainer">
-      <div
-        class="alert-dialog"
-        style="
-          position: absolute;
-          top: 30%;
-          display: block;
-          height: 18%;
-          width: 80%;
-        "
-      >
-        <div class="alert-title">
-          <h2>Alert!</h2>
-        </div>
-        <div class="alert-buttons">
-          <button class="alert-button" (click)="alertEnabler()">Cancel</button>
-          <button class="alert-button" (click)="alertEnabler()">OK</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Section Tabs -->
-  <div class="tabs">
-    <span class="active">Popular</span>
-    <span>Flash Sale</span>
-    <span>New Arrival</span>
-  </div>
-  <div class="product-grid" >
-    <div *ngFor="let item of products" class="product-card">
-      <div class="like" (click)="addWishlist(item)">
-        <i
-          class="fa-regular fa-heart"
-          *ngIf="!item.isLiked"
-          style="color: #6b1b6c"
-        ></i>
-        <i
-          class="fa-solid fa-heart"
-          *ngIf="item.isLiked"
-          style="color: #e64e33"
-        ></i>
-      </div>
-
-      <img *ngIf="item.isImageUploaded" src="https://res.cloudinary.com/djbelgg05/image/upload/{{ item.imageName }}.jpg" alt="product" class="product-image" />
-      <img *ngIf="!item.isImageUploaded" src="https://res.cloudinary.com/djbelgg05/image/upload/v1765818919/grocery1_q6c8k4.jpg" alt="product" class="product-image" />
-
-      <div class="product-content">
-        <h3 style="color: olive">{{ item.name }}</h3>
-        <p class="weight">{{ item.UnitDesc }}</p>
-
-        <div class="price-row">
-          <span class="price" style="width: 30%">₹ {{ item.price }}</span>
-
-          <div class="add-btn" style="width: 70%" *ngIf="!item.isAdded">
-            <button class="add-button" (click)="onAdd(item)">Add</button>
+  <div class="scrollDiv" (scroll)="onProductScroll($event)">
+    <div class="bg" *ngIf="showAlert">
+      <div class="backdrop" (click)="alertEnabler()"></div>
+      <!-- Alert Container -->
+      <div class="alert-container" id="alertContainer">
+        <div
+          class="alert-dialog"
+          style="
+            position: absolute;
+            top: 30%;
+            display: block;
+            height: 18%;
+            width: 80%;
+          "
+        >
+          <div class="alert-title">
+            <h2>Alert!</h2>
           </div>
-
-          <div
-            class="count"
-            style="width: 70%; display: flex; gap: 2px"
-            *ngIf="item.isAdded"
-          >
-            <button class="decrease" (click)="onRemove(item)">-</button>
-            <input
-              type="number"
-              class="quantity"
-              [value]="getQuantity(item)"
-              style="
-                width: 60%;
-                background-color: aliceblue;
-                border: 1px solid gray;
-                border-radius: 4px;
-                color: #000;
-              "
-            />
-            <button class="increase" (click)="onAdd(item)">+</button>
+          <div class="alert-buttons">
+            <button class="alert-button" (click)="alertEnabler()">
+              Cancel
+            </button>
+            <button class="alert-button" (click)="alertEnabler()">OK</button>
           </div>
         </div>
       </div>
     </div>
-  </div>
+
+    <!-- Section Tabs -->
+    <div class="tabs">
+      <span class="active">Popular</span>
+      <span>Flash Sale</span>
+      <span>New Arrival</span>
+    </div>
+    <div class="product-grid">
+      <div *ngFor="let item of products" class="product-card">
+        <div class="like" (click)="addWishlist(item)">
+          <i
+            class="fa-regular fa-heart"
+            *ngIf="!item.isLiked"
+            style="color: #6b1b6c"
+          ></i>
+          <i
+            class="fa-solid fa-heart"
+            *ngIf="item.isLiked"
+            style="color: #e64e33"
+          ></i>
+        </div>
+
+        <img
+          *ngIf="item.isImageUploaded"
+          src="https://res.cloudinary.com/djbelgg05/image/upload/{{ item.imageName }}.jpg"
+          alt="product"
+          class="product-image"
+        />
+        <img
+          *ngIf="!item.isImageUploaded"
+          src="https://res.cloudinary.com/djbelgg05/image/upload/v1765818919/grocery1_q6c8k4.jpg"
+          alt="product"
+          class="product-image"
+        />
+
+        <div class="product-content">
+          <h3 style="color: olive">{{ item.name }}</h3>
+          <p class="weight">{{ item.UnitDesc }}</p>
+
+          <div class="price-row">
+            <span class="price" style="width: 30%">₹ {{ item.price }}</span>
+
+            <div class="add-btn" style="width: 70%" *ngIf="!item.isAdded">
+              <button class="add-button" (click)="onAdd(item)">Add</button>
+            </div>
+
+            <div
+              class="count"
+              style="width: 70%; display: flex; gap: 2px"
+              *ngIf="item.isAdded"
+            >
+              <button class="decrease" (click)="onRemove(item)">-</button>
+              <input
+                type="number"
+                class="quantity"
+                [value]="getQuantity(item)"
+                style="
+                  width: 60%;
+                  background-color: aliceblue;
+                  border: 1px solid gray;
+                  border-radius: 4px;
+                  color: #000;
+                "
+              />
+              <button class="increase" (click)="onAdd(item)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
   <!-- Alert Container -->
 </ion-content>
 
+<ion-footer class="footer draggable" cdkDrag>
+  <button
+    class="nav-btn"
+    [ngClass]="{ 'active': isWishlist }"
+    (click)="togglePanel();setActive('Wishlist')"
+  >
+    <div class="icon-wrapper">
+      <img src="../../assets/heart-solid-full.svg" class="profile-icon" />
+    </div>
+    <span class="nav-label">Wishlist</span>
+    <span class="badge">{{ wishlist.length }}</span>
+  </button>
 
-  <ion-footer class="footer draggable" cdkDrag>
-    <button
-      class="nav-btn"
-      [ngClass]="{ 'active': isWishlist }"
-      (click)="togglePanel();setActive('Wishlist')"
-    >
-      <div class="icon-wrapper">
-        <img src="../../assets/heart-solid-full.svg" class="profile-icon" />
-      </div>
-      <span class="nav-label">Wishlist</span>
-      <span class="badge">{{ wishlist.length }}</span>
-    </button>
+  <!-- Home -->
+  <button
+    class="nav-btn"
+    [ngClass]="{ 'active': isHome }"
+    (click)="setActive('Home')"
+  >
+    <div class="icon-wrapper">
+      <img src="../../assets/house-solid-full.svg" class="profile-icon" />
+    </div>
+    <span class="nav-label">Home</span>
+  </button>
 
-    <!-- Home -->
-    <button
-      class="nav-btn"
-      [ngClass]="{ 'active': isHome }"
-      (click)="setActive('Home')"
-    >
-      <div class="icon-wrapper">
-        <img src="../../assets/house-solid-full.svg" class="profile-icon" />
-      </div>
-      <span class="nav-label">Home</span>
-    </button>
+  <!-- Profile -->
+  <button
+    class="nav-btn"
+    [ngClass]="{ 'active': isProfile }"
+    (click)="togglePanel();setActive('Profile')"
+  >
+    <div class="icon-wrapper">
+      <img src="../../assets/user-solid-full.svg" class="profile-icon" />
+    </div>
+    <span class="nav-label">Profile</span>
+  </button>
+  <!-- Cart -->
+  <button
+    class="nav-btn"
+    [ngClass]="{ 'active': isCart }"
+    (click)="togglePanel();this.setActive('Cart')"
+  >
+    <div class="icon-wrapper">
+      <img
+        src="../../assets/cart-shopping-solid-full.svg"
+        class="profile-icon"
+      />
+      <span class="badge">{{ selectedProduct.length }}</span>
+    </div>
+    <span class="nav-label">Cart</span>
+  </button>
 
-    <!-- Profile -->
-    <button
-      class="nav-btn"
-      [ngClass]="{ 'active': isProfile }"
-      (click)="togglePanel();setActive('Profile')"
-    >
-      <div class="icon-wrapper">
-        <img src="../../assets/user-solid-full.svg" class="profile-icon" />
-      </div>
-      <span class="nav-label">Profile</span>
-    </button>
-    <!-- Cart -->
-    <button
-      class="nav-btn"
-      [ngClass]="{ 'active': isCart }"
-      (click)="togglePanel();this.setActive('Cart')"
-    >
-      <div class="icon-wrapper">
-        <img
-          src="../../assets/cart-shopping-solid-full.svg"
-          class="profile-icon"
-        />
-        <span class="badge">{{ selectedProduct.length }}</span>
-      </div>
-      <span class="nav-label">Cart</span>
-    </button>
-
-    <!-- <button class="nav-btn" onclick="setActive(this)">
+  <!-- <button class="nav-btn" onclick="setActive(this)">
         <div class="icon-wrapper">
           <img src="../../assets/credit-card-solid-full.svg" class="profile-icon" />
         </div>
         <span class="nav-label">Categories</span>
       </button> -->
-    <!-- Wishlist -->
-  </ion-footer>
+  <!-- Wishlist -->
+</ion-footer>
 
 <!-- SIDE PANEL (slides in/out) -->
 <div class="side-panel" [class.open]="isPanelOpen">
@@ -275,17 +283,20 @@
       <button class="close-btn" (click)="setActive('Home');togglePanel();">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
-      <h4 style="margin: 0px 0px 0px 10px" *ngIf="!paymentModeUI">Profile Information</h4>
-      <h4 style="margin: 0px 0px 0px 10px" *ngIf="paymentModeUI">Place order</h4>
+      <h4 style="margin: 0px 0px 0px 10px" *ngIf="!paymentModeUI">
+        Profile Information
+      </h4>
+      <h4 style="margin: 0px 0px 0px 10px" *ngIf="paymentModeUI">
+        Place order
+      </h4>
     </div>
 
-     <div class="panel-head" *ngIf="isOrderHistory">
+    <div class="panel-head" *ngIf="isOrderHistory">
       <button class="close-btn" (click)="closeOrderHistory()">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
       <h4 style="margin: 0px 0px 0px 10px">My Orders</h4>
     </div>
-
   </div>
   <div
     class="cart-list"
@@ -345,7 +356,9 @@
     <div class="panel-footer">
       <div class="total">Total: ₹ {{ totalPrice }}</div>
       <div class="cart-buttons">
-        <button class="checkout-btn" (click)="onPlaceOrder()">Place order</button>
+        <button class="checkout-btn" (click)="onPlaceOrder()">
+          Place order
+        </button>
         <!-- (click)=" pay()" -->
         <button class="checkout-btn" (click)="clearCart()">Clear Cart</button>
       </div>
@@ -419,173 +432,219 @@
   </div>
 
   <!-- ORDER HISTORY PANEL -->
-<div class="order-history" 
-     style="flex: 1; overflow: auto; display: flex; flex-direction: column" 
-     *ngIf="isOrderHistory">
-<div class="orders-list" style="padding: 16px;">
-  <div *ngFor="let order of orders" class="order-card-modern">
+  <div
+    class="order-history"
+    style="flex: 1; overflow: auto; display: flex; flex-direction: column"
+    *ngIf="isOrderHistory"
+  >
+    <div class="orders-list" style="padding: 16px">
+      <div *ngFor="let order of orders" class="order-card-modern">
+        <!-- Header -->
+        <div class="order-modern-header">
+          <div>
+            <div class="order-id">Order #{{ order.orderId }}</div>
+            <div class="order-date">{{ order.date | date : 'medium' }}</div>
+          </div>
 
-    <!-- Header -->
-    <div class="order-modern-header">
-      <div>
-        <div class="order-id">Order #{{ order.orderId }}</div>
-        <div class="order-date">{{ order.date | date : 'medium' }}</div>
-      </div>
-
-      <div class="order-status"
-           [ngClass]="{
+          <div
+            class="order-status"
+            [ngClass]="{
               'cancelled': order.status === 'cancelled',
               'completed': order.status === 'delivered'
-           }">
-        {{ order.status }}
-      </div>
-    </div>
+           }"
+          >
+            {{ order.status }}
+          </div>
+        </div>
 
-    <!-- Stepper -->
-    <div class="order-stepper" *ngIf="order.status != 'pending' && order.status != 'cancelled' && order.status != 'delivered'">
-
-      <!-- PICKED -->
-      <div class="step" [class.active]="order.status !== 'pending'">
-        <div class="circle">
-          <ng-container *ngIf="order.status === 'picked' 
+        <!-- Stepper -->
+        <div
+          class="order-stepper"
+          *ngIf="order.status != 'pending' && order.status != 'cancelled' && order.status != 'delivered'"
+        >
+          <!-- PICKED -->
+          <div class="step" [class.active]="order.status !== 'pending'">
+            <div class="circle">
+              <ng-container
+                *ngIf="order.status === 'picked' 
                             || order.status === 'packed' 
-                            || order.status === 'delivered'|| order.status === 'Out for delivery'; else number1">
-            ✔
-          </ng-container>
-          <ng-template #number1>1</ng-template>
+                            || order.status === 'delivered'|| order.status === 'Out for delivery'; else number1"
+              >
+                ✔
+              </ng-container>
+              <ng-template #number1>1</ng-template>
+            </div>
+            <span>Picked</span>
+          </div>
+
+          <div
+            class="line"
+            [class.active]="order.status === 'packed' 
+                        || order.status === 'delivered'|| order.status === 'Out for delivery'"
+          ></div>
+
+          <!-- PACKED -->
+          <div
+            class="step"
+            [class.active]="order.status === 'packed' 
+                                     || order.status === 'delivered'|| order.status === 'Out for delivery'"
+          >
+            <div class="circle">
+              <ng-container
+                *ngIf="order.status === 'packed' 
+                            || order.status === 'delivered'|| order.status === 'Out for delivery'; else number2"
+              >
+                ✔
+              </ng-container>
+              <ng-template #number2>2</ng-template>
+            </div>
+            <span>Packed</span>
+          </div>
+
+          <div class="line" [class.active]="order.status === 'delivered'"></div>
+
+          <!-- DELIVERED -->
+          <div class="step" [class.active]="order.status === 'delivered'">
+            <div class="circle">
+              <ng-container *ngIf="order.status === 'delivered'; else number3">
+                ✔
+              </ng-container>
+              <ng-template #number3>3</ng-template>
+            </div>
+            <span>Delivered</span>
+          </div>
         </div>
-        <span>Picked</span>
+
+        <!-- Amount -->
+        <div class="order-total">₹ {{ order.amountPaid }}</div>
+
+        <!-- Cancel Button -->
+        <button
+          *ngIf="order.status == 'pending'"
+          class="cancel-order-btn"
+          (click)="cancelOrder(order.orderId)"
+        >
+          Cancel Order
+        </button>
       </div>
+    </div>
+  </div>
 
-      <div class="line"
-           [class.active]="order.status === 'packed' 
-                        || order.status === 'delivered'|| order.status === 'Out for delivery'"></div>
-
-      <!-- PACKED -->
-      <div class="step" [class.active]="order.status === 'packed' 
-                                     || order.status === 'delivered'|| order.status === 'Out for delivery'">
-        <div class="circle">
-          <ng-container *ngIf="order.status === 'packed' 
-                            || order.status === 'delivered'|| order.status === 'Out for delivery'; else number2">
-            ✔
-          </ng-container>
-          <ng-template #number2>2</ng-template>
+  <div
+    class="profile-details"
+    style="flex: 1; overflow: auto; display: flex; flex-direction: column"
+    *ngIf="isProfile || paymentModeUI"
+  >
+    <div class="user-details">
+      <!-- SHOW AVATAR ONLY IF NOT PAYMENT MODE -->
+      <div class="profile-header" *ngIf="!paymentModeUI">
+        <div class="avatar">
+          <i class="fa-solid fa-user"></i>
         </div>
-        <span>Packed</span>
       </div>
 
-      <div class="line"
-           [class.active]="order.status === 'delivered'"></div>
-
-      <!-- DELIVERED -->
-      <div class="step" [class.active]="order.status === 'delivered'">
-        <div class="circle">
-          <ng-container *ngIf="order.status === 'delivered'; else number3">
-            ✔
-          </ng-container>
-          <ng-template #number3>3</ng-template>
+      <!-- COLLAPSIBLE SECTION -->
+      <div class="collapsible-container">
+        <div class="collapsible-header" (click)="toggleDetails()">
+          <span class="blackTxt">My Details</span>
+          <i
+            class="fa-solid"
+            [ngClass]="showDetails ? 'fa-chevron-up' : 'fa-chevron-down'"
+          ></i>
         </div>
-        <span>Delivered</span>
+
+        <div class="collapsible-body" *ngIf="showDetails">
+          <mat-form-field appearance="outline" class="full-width-field">
+            <mat-label>Name</mat-label>
+            <input
+              matInput
+              placeholder="Enter your name"
+              [(ngModel)]="userName"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width-field">
+            <mat-label>Email</mat-label>
+            <input
+              matInput
+              placeholder="Enter your gmail"
+              [(ngModel)]="email"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width-field">
+            <mat-label>Phone</mat-label>
+            <input
+              matInput
+              placeholder="Enter your phone no"
+              [(ngModel)]="phoneNumber"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width-field">
+            <mat-label>Delivery Address</mat-label>
+            <input
+              matInput
+              placeholder="Enter your address"
+              [(ngModel)]="address"
+            />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- ORDERS + LOGOUT ONLY IF NOT PAYMENT MODE -->
+      <div class="list-settings" *ngIf="!paymentModeUI">
+        <div class="list-item" (click)="openOrderHistory()">
+          <span class="blackTxt">My Orders</span>
+          <i class="fa-solid fa-chevron-right"></i>
+        </div>
+
+        <div class="list-item logout" (click)="logout()">
+          <span>Logout</span>
+          <i class="fa-solid fa-chevron-right"></i>
+        </div>
+      </div>
+
+      <!-- PAYMENT MODE UI -->
+      <div class="payment-container" *ngIf="paymentModeUI">
+        <div class="payment-title">Payment Mode</div>
+
+        <!-- <mat-radio-group [(ngModel)]="paymentMode" class="payment-mode-group">
+          <mat-radio-button value="cash">Cash</mat-radio-button>
+          <mat-radio-button value="upi">UPI</mat-radio-button>
+        </mat-radio-group>
+      </div> -->
+
+      <div class="paymode-container">
+        <div
+          class="paymode-card"
+          [class.selected]="selectedMode === 'upi'"
+          (click)="selectMode('upi')"
+        >
+          <i class="fas fa-credit-card"></i>
+          <span>UPI</span>
+        </div>
+
+        <div
+          class="paymode-card"
+          [class.selected]="selectedMode === 'cash'"
+          (click)="selectMode('cash')"
+        >
+          <i class="fas fa-money-bill-wave"></i>
+          <span>Cash on Delivery</span>
+        </div>
       </div>
 
     </div>
 
-    <!-- Amount -->
-    <div class="order-total">₹ {{ order.amountPaid }}</div>
-
-    <!-- Cancel Button -->
-    <button 
-      *ngIf="order.status == 'pending'"
-      class="cancel-order-btn"
-      (click)="cancelOrder(order.orderId)">
-      Cancel Order
-    </button>
-
   </div>
-</div>
-
-</div>
-
-
-<div
-  class="profile-details"
-  style="flex: 1; overflow: auto; display: flex; flex-direction: column"
-  *ngIf="isProfile || paymentModeUI"
->
-  <div class="user-details">
-
-    <!-- SHOW AVATAR ONLY IF NOT PAYMENT MODE -->
-    <div class="profile-header" *ngIf="!paymentModeUI">
-      <div class="avatar">
-        <i class="fa-solid fa-user"></i>
+  
+    <div class="panel-footer"  *ngIf="isProfile || paymentModeUI">
+      <div class="cart-buttons">
+        <button class="checkout-btn" (click)="saveUserData()">Save</button>
+        <button class="checkout-btn" (click)="clearCart()">Clear</button>
       </div>
     </div>
-
-    <!-- COLLAPSIBLE SECTION -->
-    <div class="collapsible-container">
-      <div class="collapsible-header" (click)="toggleDetails()">
-        <span class="blackTxt">My Details</span>
-        <i class="fa-solid" [ngClass]="showDetails ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-      </div>
-
-      <div class="collapsible-body" *ngIf="showDetails">
-        <mat-form-field appearance="outline" class="full-width-field">
-          <mat-label>Name</mat-label>
-          <input matInput placeholder="Enter your name" [(ngModel)]="userName" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width-field">
-          <mat-label>Email</mat-label>
-          <input matInput placeholder="Enter your gmail" [(ngModel)]="email" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width-field">
-          <mat-label>Phone</mat-label>
-          <input matInput placeholder="Enter your phone no" [(ngModel)]="phoneNumber" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width-field">
-          <mat-label>Delivery Address</mat-label>
-          <input matInput placeholder="Enter your address" [(ngModel)]="address" />
-        </mat-form-field>
-      </div>
-    </div>
-
-    <!-- ORDERS + LOGOUT ONLY IF NOT PAYMENT MODE -->
-<div class="list-settings" *ngIf="!paymentModeUI">
-  <div class="list-item" (click)="openOrderHistory()">
-    <span class="blackTxt">My Orders</span>
-    <i class="fa-solid fa-chevron-right"></i>
-  </div>
-
-  <div class="list-item logout" (click)="logout()">
-    <span>Logout</span>
-    <i class="fa-solid fa-chevron-right"></i>
-  </div>
-</div>
-
-
-    <!-- PAYMENT MODE UI -->
-    <div class="payment-container" *ngIf="paymentModeUI">
-      <div class="payment-title">Payment Mode</div>
-
-      <mat-radio-group [(ngModel)]="paymentMode" class="payment-mode-group">
-        <mat-radio-button value="cash">Cash</mat-radio-button>
-        <mat-radio-button value="upi">UPI</mat-radio-button>
-      </mat-radio-group>
-    </div>
-
-  </div>
-
-  <div class="panel-footer">
-    <div class="cart-buttons">
-      <button class="checkout-btn" (click)="saveUserData()">Save</button>
-      <button class="checkout-btn" (click)="clearCart()">Clear</button>
-    </div>
-  </div>
-</div>
-
-
 </div>
 
 <div class="overlay" [class.show]="isPanelOpen" (click)="togglePanel()"></div>
@@ -609,55 +668,75 @@
 </footer> -->
 
 <!-- OVERLAY -->
-<div class="overlayDiv" *ngIf="isModalOpen" ></div>
+<div class="overlayDiv" *ngIf="isModalOpen"></div>
 
 <!-- MAIN MODAL BOX -->
 <div class="auth-box" *ngIf="isModalOpen">
-  
   <!-- HEADER -->
   <div class="auth-header">
     <h2>{{ isSignupMode ? "Create Account" : "Login" }}</h2>
-    <button class="close-btn" (click)="closeModal()">✕</button>
+    <button class="close-btnAlt" (click)="closeModal()">✕</button>
   </div>
 
   <ng-container *ngIf="isForgotMode">
-
-  <div class="form-group" *ngIf="!otpSent">
-    <label>Email / Phone</label>
-    <input type="text" [(ngModel)]="forgotData.identifier" placeholder="Enter registered mobile or email">
-  </div>
-
-  <button class="primary-btn" *ngIf="!otpSent" (click)="sendResetOTP()">Send OTP</button>
-
-  <div class="otp-section" *ngIf="otpSent">
-    <div class="form-group">
-      <label>Enter OTP</label>
-      <input type="text" [(ngModel)]="forgotData.otp" placeholder="Enter OTP">
+    <div class="form-group" *ngIf="!otpSent">
+      <label>Email / Phone</label>
+      <input
+        type="text"
+        [(ngModel)]="forgotData.identifier"
+        placeholder="Enter registered mobile or email"
+      />
     </div>
 
-    <div class="form-group">
-      <label>New Password</label>
-      <input type="password" [(ngModel)]="forgotData.password" placeholder="Enter new password">
+    <button class="primary-btn" *ngIf="!otpSent" (click)="sendResetOTP()">
+      Send OTP
+    </button>
+
+    <div class="otp-section" *ngIf="otpSent">
+      <div class="form-group">
+        <label>Enter OTP</label>
+        <input
+          type="text"
+          [(ngModel)]="forgotData.otp"
+          placeholder="Enter OTP"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>New Password</label>
+        <input
+          type="password"
+          [(ngModel)]="forgotData.password"
+          placeholder="Enter new password"
+        />
+      </div>
+
+      <button class="primary-btn" (click)="resetPassword()">
+        Reset Password
+      </button>
     </div>
 
-    <button class="primary-btn" (click)="resetPassword()">Reset Password</button>
-  </div>
-
-  <p class="switch-text" (click)="switchToLogin()">Back to Login</p>
-
-</ng-container>
+    <p class="switch-text" (click)="switchToLogin()">Back to Login</p>
+  </ng-container>
 
   <!-- ---------------- LOGIN VIEW ---------------- -->
   <ng-container *ngIf="isLoginMode">
-
     <div class="form-group">
       <label>Email / Phone</label>
-      <input type="text" [(ngModel)]="loginData.identifier" placeholder="Enter mobile or email">
+      <input
+        type="text"
+        [(ngModel)]="loginData.identifier"
+        placeholder="Enter mobile or email"
+      />
     </div>
 
     <div class="form-group">
       <label>Password</label>
-      <input type="password" [(ngModel)]="loginData.password" placeholder="Enter password">
+      <input
+        type="password"
+        [(ngModel)]="loginData.password"
+        placeholder="Enter password"
+      />
     </div>
 
     <p class="forgot-text" (click)="openForgotPassword()">Forgot Password?</p>
@@ -666,46 +745,64 @@
 
     <button class="skip-btn" (click)="skipLogin()">Skip for now</button>
 
-    <p class="switch-text" (click)="switchToSignup()">New user? Create Account</p>
-
+    <p class="switch-text" (click)="switchToSignup()">
+      New user? Create Account
+    </p>
   </ng-container>
 
   <!-- ---------------- SIGNUP VIEW ---------------- -->
   <ng-container *ngIf="isSignupMode">
-
     <div class="form-group">
       <label>Name</label>
-      <input type="text" [(ngModel)]="signupData.name" placeholder="Enter full name">
+      <input
+        type="text"
+        [(ngModel)]="signupData.name"
+        placeholder="Enter full name"
+      />
     </div>
 
     <div class="form-group">
       <label>Email / Phone</label>
-      <input type="text" [(ngModel)]="signupData.mobile" placeholder="Enter mobile or email">
+      <input
+        type="text"
+        [(ngModel)]="signupData.mobile"
+        placeholder="Enter mobile or email"
+      />
     </div>
 
     <div class="form-group">
       <label>Password</label>
-      <input type="password" [(ngModel)]="signupData.password" placeholder="Create password">
+      <input
+        type="password"
+        [(ngModel)]="signupData.password"
+        placeholder="Create password"
+      />
     </div>
 
     <div class="form-group">
       <label>Confirm Password</label>
-      <input type="password" [(ngModel)]="signupData.confirm" placeholder="Confirm password">
+      <input
+        type="password"
+        [(ngModel)]="signupData.confirm"
+        placeholder="Confirm password"
+      />
     </div>
 
     <div class="form-group">
       <label>Address</label>
-      <textarea [(ngModel)]="signupData.address" placeholder="Enter address"></textarea>
+      <textarea
+        [(ngModel)]="signupData.address"
+        placeholder="Enter address"
+      ></textarea>
     </div>
 
     <button class="primary-btn" (click)="signup()">Create Account</button>
 
-    <p class="switch-text" (click)="switchToLogin()">Already have an account? Login</p>
-
+    <p class="switch-text" (click)="switchToLogin()">
+      Already have an account? Login
+    </p>
   </ng-container>
 </div>
-
-
 
 <div class="loader-overlay" *ngIf="isLoading">
   <ion-spinner name="crescent"></ion-spinner>
