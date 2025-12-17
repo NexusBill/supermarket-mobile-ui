@@ -1703,6 +1703,10 @@ ion-item:hover {
   position: relative;
 }
 
+.blackTxt{
+  color: #212121 !important;
+}
+
 .total{
   padding:10px 20px !important;
   color: #212121 !important;
@@ -1731,7 +1735,7 @@ ion-item:hover {
   background: none;
   border: none;
   font-size: 20px;
-  color: white;
+  color: #7a7a7a;
   cursor: pointer;
 }
 .no-item{
@@ -2128,6 +2132,29 @@ ion-segment-button {
   border: none;
 }
 
+
+
 .list-item.logout {
   color: #d9534f;
+}
+
+
+.loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+ion-spinner {
+  width: 40px;
+  height: 40px;
+  color: #6b1b6c;
 }

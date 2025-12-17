@@ -44,6 +44,8 @@ interface Product {
   quantity?: number;
   isAdded: boolean;
   isLiked: boolean;
+  imageName:string;
+  isImageUploaded:boolean;
 }
 
 @Component({
@@ -77,6 +79,7 @@ paymentMode: string = '';
   errorMsg: string | null = null;
   isOrderHistory = false;
   orders: any[] = [];
+  isLoading = false;
   categories: Category[] = [
     { id: 'snacks', name: 'Snacks', icon: 'https://via.placeholder.com/64?text=Sn' },
     { id: 'breakfast', name: 'Breakfast', icon: 'https://via.placeholder.com/64?text=Bf' },
@@ -156,7 +159,7 @@ resetStates(){
 }
 products: Product[] = [];
 page = 1;
-limit = 1000;
+limit = 100;
 loadingMore = false;
 allLoaded = false;
 
@@ -170,8 +173,14 @@ onProductScroll(event: any) {
   }
 }
 
- getProducts() {
+
+getProducts() {
   if (this.loadingMore || this.allLoaded) return;
+
+  // Show loader only for FIRST load
+  if (this.page === 1) {
+    this.isLoading = true;
+  }
 
   this.loadingMore = true;
 
@@ -179,17 +188,26 @@ onProductScroll(event: any) {
     .get<any>(
       `https://supermartspring.vercel.app/api/nexus_supermart/products?page=${this.page}&limit=${this.limit}`
     )
-    .subscribe(res => {
-      if (!res?.data?.length) {
-        this.allLoaded = true;
-      } else {
-        this.products = [...this.products, ...res.data];
-        this.page++;
+    .subscribe({
+      next: (res: any) => {
+        if (!res?.data?.length) {
+          this.allLoaded = true;
+        } else {
+          this.products = [...this.products, ...res.data];
+          this.page++;
+        }
+      },
+      error: (err: any) => {
+        console.error('Product API error', err);
+        this.showCustomToast('Failed to load products', 'danger');
+      },
+      complete: () => {
+        this.loadingMore = false;
+        this.isLoading = false;
       }
-
-      this.loadingMore = false;
     });
 }
+
 
 
 paymentModeUI:boolean=false;
@@ -245,20 +263,21 @@ closeOrderHistory() {
 }
 
 loadOrders() {
-  // if(this.userDetails.customerId===undefined || this.userDetails.customerId===null || this.userDetails.customerId===''){
-  //  window.alert("Please login again.");
-  //   return;
-  // }
- this.supermartService.getOrders(1234).subscribe({
+  this.isLoading = true;
+
+  this.supermartService.getOrders(1234).subscribe({
     next: (res: any) => {
-        debugger;
       this.orders = res;
     },
     error: () => {
-      this.showCustomToast("Failed to load orders",'danger');
+      this.showCustomToast("Failed to load orders", 'danger');
+    },
+    complete: () => {
+      this.isLoading = false;
     }
   });
 }
+
 
 cancelOrder(id: string) {
 
@@ -548,22 +567,24 @@ saveUserData() {
 }
 
 submitOrderToBackend(payload: any) {
-  console.log("FINAL ORDER PAYLOAD ➜", payload);
+  this.isLoading = true;
+
   this.supermartService.placeOrder(payload).subscribe({
     next: () => {
       this.showCustomToast('Order placed successfully! ✅', 'success');
       this.clearCart();
       this.isPanelOpen = false;
-
-      // If you want to refresh order list
       this.loadOrders();
     },
-    error: (err) => {
-      console.error('Order API Error:', err);
+    error: () => {
       this.showCustomToast('Failed to place order ❌', 'danger');
+    },
+    complete: () => {
+      this.isLoading = false;
     }
   });
 }
+
 
 
 userName!:string;
@@ -978,24 +999,30 @@ skipLogin() {
 
 login() {
   if (!this.loginData.identifier || !this.loginData.password) {
-    this.showCustomToast("Enter all fields",'danger');
+    this.showCustomToast("Enter all fields", 'danger');
     return;
   }
+
+  this.isLoading = true;
 
   this.supermartService.login({
     mobile: this.loginData.identifier,
     password: this.loginData.password
   }).subscribe({
-    next: res => {
-      this.showCustomToast("Login success",'success');
+    next: (res: any) => {
+      this.showCustomToast("Login success", 'success');
       localStorage.setItem("supermart_user", JSON.stringify(res));
       this.closeModal();
     },
-    error: err => {
-      this.showCustomToast("Invalid login",'danger');
+    error: () => {
+      this.showCustomToast("Invalid login", 'danger');
+    },
+    complete: () => {
+      this.isLoading = false;
     }
   });
 }
+
 
 closeModal() {
   this.isModalOpen = false;
@@ -1005,14 +1032,16 @@ closeModal() {
 
 signup() {
   if (!this.signupData.name || !this.signupData.mobile || !this.signupData.password) {
-    this.showCustomToast("Please fill all details",'danger');
+    this.showCustomToast("Please fill all details", 'danger');
     return;
   }
 
   if (this.signupData.password !== this.signupData.confirm) {
-    this.showCustomToast("Passwords do not match",'danger');
+    this.showCustomToast("Passwords do not match", 'danger');
     return;
   }
+
+  this.isLoading = true;
 
   const payload = {
     customerId: "CUST" + Math.floor(Math.random() * 9000 + 1000),
@@ -1024,16 +1053,20 @@ signup() {
   };
 
   this.supermartService.addCustomer(payload).subscribe({
-    next: res => {
-      this.showCustomToast("Account created successfully",'success');
+    next: () => {
+      this.showCustomToast("Account created successfully", 'success');
       this.switchToLogin();
       this.closeModal();
     },
-    error: err => {
-      this.showCustomToast("Signup failed",'danger');
+    error: () => {
+      this.showCustomToast("Signup failed", 'danger');
+    },
+    complete: () => {
+      this.isLoading = false;
     }
   });
 }
+
 
 
 openForgotPassword() {

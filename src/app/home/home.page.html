@@ -152,7 +152,8 @@
         ></i>
       </div>
 
-      <img src="https://res.cloudinary.com/djbelgg05/image/upload/{{ item.name }}.jpg" alt="product" class="product-image" />
+      <img *ngIf="item.isImageUploaded" src="https://res.cloudinary.com/djbelgg05/image/upload/{{ item.imageName }}.jpg" alt="product" class="product-image" />
+      <img *ngIf="!item.isImageUploaded" src="https://res.cloudinary.com/djbelgg05/image/upload/v1765818919/grocery1_q6c8k4.jpg" alt="product" class="product-image" />
 
       <div class="product-content">
         <h3 style="color: olive">{{ item.name }}</h3>
@@ -523,7 +524,7 @@
     <!-- COLLAPSIBLE SECTION -->
     <div class="collapsible-container">
       <div class="collapsible-header" (click)="toggleDetails()">
-        <span>My Details</span>
+        <span class="blackTxt">My Details</span>
         <i class="fa-solid" [ngClass]="showDetails ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
       </div>
 
@@ -553,7 +554,7 @@
     <!-- ORDERS + LOGOUT ONLY IF NOT PAYMENT MODE -->
 <div class="list-settings" *ngIf="!paymentModeUI">
   <div class="list-item" (click)="openOrderHistory()">
-    <span>My Orders</span>
+    <span class="blackTxt">My Orders</span>
     <i class="fa-solid fa-chevron-right"></i>
   </div>
 
@@ -706,3 +707,6 @@
 
 
 
+<div class="loader-overlay" *ngIf="isLoading">
+  <ion-spinner name="crescent"></ion-spinner>
+</div>
