@@ -655,13 +655,26 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full-width-field">
-            <mat-label>Delivery Address</mat-label>
-            <input
-              matInput
-              placeholder="Enter your address"
-              [(ngModel)]="address"
-            />
-          </mat-form-field>
+  <mat-label>Delivery Address</mat-label>
+
+  <input
+    matInput
+    placeholder="Enter your address"
+    [(ngModel)]="address"
+  />
+
+  <!-- Location Icon -->
+  <button
+    mat-icon-button
+    matSuffix
+    type="button"
+    (click)="getLocation()"
+    aria-label="Get current location"
+  >
+    <mat-icon class="locationIcon">location_on</mat-icon>
+  </button>
+</mat-form-field>
+
         </div>
       </div>
 
