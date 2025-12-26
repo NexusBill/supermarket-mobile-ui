@@ -109,6 +109,7 @@ paymentMode: string = 'upi';
   isOrderHistory = false;
   orders: any[] = [];
   isLoading = false;
+  loaderText = 'Loading... Please wait.';
   categories: Category[] = [
     { id: 'snacks', name: 'Snacks', icon: 'https://via.placeholder.com/64?text=Sn' },
     { id: 'breakfast', name: 'Breakfast', icon: 'https://via.placeholder.com/64?text=Bf' },
@@ -209,6 +210,7 @@ getSearchedProducts(query: string) {
     this.showCustomToast('Please enter a search term','warning');
   }else{
   this.isLoading=true;
+  this.loaderText='Searching products... Please wait.';
   this.searchText = query;
   this.http
     .get<any>(
@@ -218,6 +220,7 @@ getSearchedProducts(query: string) {
       this.filteredSuggestions = res.data || [];
       this.filteredProductsList = res;
        this.isLoading=false;
+       this.loaderText = 'Loading... Please wait.';
     });
     }
 }
@@ -234,9 +237,11 @@ getProducts() {
   // Show loader only for FIRST load
   if (this.page === 1) {
     this.isLoading = true;
+    this.loaderText = 'Loading products... Please wait.';
   }
 
   this.isLoading = true;
+  this.loaderText = 'Loading products... Please wait.';
 
   this.http
     .get<any>(
@@ -259,6 +264,7 @@ getProducts() {
       complete: () => {
         this.loadingMore = false;
         this.isLoading = false;
+        this.loaderText = 'Loading... Please wait.';
       }
     });
 }
@@ -406,10 +412,12 @@ logout() {
   async pay() {
     debugger
     this.isLoading = true;
+    this.loaderText = 'Initializing payment... Please wait.';
     const amountInPaise = Math.round(this.totalPrice * 100);
 
   if (amountInPaise <= 0) {
      this.isLoading = false;
+     this.loaderText = 'Loading... Please wait.';
      this.showCustomToast('Cart is empty!','danger');
     return;
   }
@@ -459,6 +467,7 @@ logout() {
 verifyPayment(response: any) {
 debugger
  this.isLoading = true;
+ this.loaderText = 'Verifying payment... Please wait.';
   // STEP 1: Verify Razorpay payment
   this.http.post("https://supermartspring.vercel.app/verify-payment", {
     razorpay_order_id: response.razorpay_order_id,
@@ -502,12 +511,14 @@ debugger
           next: () => {
             this.showCustomToast("Order placed successfully! 🛒", "success");
             this.isLoading = false;
+            this.loaderText = 'Loading... Please wait.';
             this.clearCart();
             this.isPanelOpen = false;
             this.loadOrders();
           },
           error: () => {
              this.isLoading = false;
+             this.loaderText = 'Loading... Please wait.';
             this.showCustomToast('Failed to place order ❌', 'danger');
           }
         });
@@ -588,14 +599,15 @@ userDetails: any = {};
     item.isLiked = false;
     this.wishlist = [...this.wishlist.filter(p => p.isLiked === true)];
   }
-  removeFromCart(item: any) {
+  
+  removeFromCart(index: number, item: any) {
+  item.isAdded = false;
+  item.quantity = 0;
+  this.selectedProduct.splice(index, 1);
+  this.selectedProduct = [...this.selectedProduct];
 
-    item.isAdded = false; // Hide + - and show Add again
-    item.quantity = 0;
-    this.selectedProduct = [...this.selectedProduct.filter(p => p.id !== item.id)];
-
-    this.calculateTotals();
-  }
+  this.calculateTotals();
+}
   setActive(btn: any) {
     this.resetStates();
     if (btn === 'Home') {
@@ -635,6 +647,7 @@ saveUserData() {
   }
 
   this.isLoading = true;
+  this.loaderText = 'Placing your order... Please wait.';
 
   localStorage.setItem("userName", this.userName);
   localStorage.setItem("email", this.email);
@@ -683,6 +696,7 @@ saveUserData() {
 submitOrderToBackend(payload: any) {
   debugger
   this.isLoading = true;
+  this.loaderText = 'Placing your order... Please wait.';
 
   this.supermartService.placeOrder(payload).subscribe({
     next: () => {
@@ -1129,6 +1143,7 @@ login() {
   }
 
   this.isLoading = true;
+  this.loaderText = 'Logging in... Please wait.';
 
   this.supermartService.login({
     mobile: this.loginData.identifier,
@@ -1171,6 +1186,7 @@ signup() {
   }
 
   this.isLoading = true;
+  this.loaderText = 'Creating account... Please wait.';
 
   const payload = {
     customerId: "CUST" + Math.floor(Math.random() * 9000 + 1000),
@@ -1192,6 +1208,7 @@ signup() {
     },
     complete: () => {
       this.isLoading = false;
+      this.loaderText = 'Loading... Please wait.';
     }
   });
 }

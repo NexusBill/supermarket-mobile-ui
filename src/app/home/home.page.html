@@ -377,9 +377,9 @@
     *ngIf="isCart"
   >
     <div class="cart-section">
-      <div *ngFor="let item of selectedProduct" class="cart-item">
+      <div *ngFor="let item of selectedProduct; let i = index" class="cart-item">
         <div class="product-card">
-          <div class="like" (click)="removeFromCart(item)">
+          <div class="like" (click)="removeFromCart(i, item)">
             <i class="fa-regular fa-circle-xmark" style="color: #a453d0"></i>
           </div>
           <img
@@ -648,7 +648,7 @@
           <mat-form-field appearance="outline" class="full-width-field">
             <mat-label>Phone</mat-label>
             <input
-              matInput
+              matInput type="number"
               placeholder="Enter your phone no"
               [(ngModel)]="phoneNumber"
             />
@@ -898,4 +898,5 @@
 		</g>
 	</svg>
 </div>
+<div class="loader-text">{{loaderText}}</div>
 </div>
