@@ -68,18 +68,21 @@
         (input)="onSearchChange()"
       />
 
-      <i class="fa-solid fa-magnifying-glass search-icon"></i>
+       <button class="close-btnAlt searchClear search-icon" *ngIf="searchText != ''" (click)="clearSearch()">✕</button>
+
+      <i class="fa-solid fa-magnifying-glass search-icon" (click)="getSearchedProducts(searchText)"></i>
 
       <!-- Suggestion Box -->
-      <div class="suggestion-box" *ngIf="filteredSuggestions.length > 0">
+      <div class="suggestion-box" *ngIf="searchText.length > 0">
         <div
           class="suggestion-item"
           *ngFor="let suggestion of filteredSuggestions"
-          (click)="selectSuggestion(suggestion.name)"
-        >
+          (click)="selectSuggestion(suggestion.name)">
           <i class="fa-solid fa-clock-rotate-left icon"></i>
           <span class="text">{{ suggestion.name }}</span>
         </div>
+
+        <div class="searchAllTxt" (click)="getSearchedProducts(searchText)">Show all products</div>
       </div>
     </div>
   </div>
@@ -89,7 +92,7 @@
 <div class="content">
   <div class="categories-scroll">
     <div class="category" *ngFor="let cat of suggestions">
-      <div class="cat-displayer" (click)="selectSuggestion(cat.name)">
+      <div class="cat-displayer" (click)="getSearchedProducts(cat.name)">
         <img src="../../assets/shapes.svg" />
         <p>{{cat.name}}</p>
       </div>
@@ -136,6 +139,74 @@
       <span>Flash Sale</span>
       <span>New Arrival</span>
     </div>
+    <div class="productContainer" *ngIf="filteredProductsList.length !=0">
+      <div class="filtered-products">Filtered products</div>
+     <div class="product-grid">
+         <div *ngFor="let item of filteredProductsList" class="product-card">
+        <div class="like" (click)="addWishlist(item)">
+          <i
+            class="fa-regular fa-heart"
+            *ngIf="!item.isLiked"
+            style="color: #6b1b6c"
+          ></i>
+          <i
+            class="fa-solid fa-heart"
+            *ngIf="item.isLiked"
+            style="color: #e64e33"
+          ></i>
+        </div>
+
+        <img
+          *ngIf="item.isImageUploaded"
+          src="https://res.cloudinary.com/djbelgg05/image/upload/{{ item.imageName }}.jpg"
+          alt="product"
+          class="product-image"
+        />
+        <img
+          *ngIf="!item.isImageUploaded"
+          src="https://res.cloudinary.com/djbelgg05/image/upload/v1765818919/grocery1_q6c8k4.jpg"
+          alt="product"
+          class="product-image"
+        />
+
+        <div class="product-content">
+          <h3 style="color: olive">{{ item.name }}</h3>
+          <p class="weight">{{ item.UnitDesc }}</p>
+
+          <div class="price-row">
+            <span class="price" style="width: 30%">₹ {{ item.price }}</span>
+
+            <div class="add-btn" style="width: 70%" *ngIf="!item.isAdded">
+              <button class="add-button" (click)="onAdd(item)">Add</button>
+            </div>
+
+            <div
+              class="count"
+              style="width: 70%; display: flex; gap: 2px"
+              *ngIf="item.isAdded"
+            >
+              <button class="decrease" (click)="onRemove(item)">-</button>
+              <input
+                type="number"
+                class="quantity"
+                [value]="getQuantity(item)"
+                style="
+                  width: 60%;
+                  background-color: aliceblue;
+                  border: 1px solid gray;
+                  border-radius: 4px;
+                  color: #000;
+                "
+              />
+              <button class="increase" (click)="onAdd(item)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+     </div>
+     <div class="filtered-products">All products</div>
+    </div>
+
     <div class="product-grid">
       <div *ngFor="let item of products" class="product-card">
         <div class="like" (click)="addWishlist(item)">
@@ -203,7 +274,8 @@
   <!-- Alert Container -->
 </ion-content>
 
-<ion-footer class="footer draggable" cdkDrag>
+<ion-footer >
+  <div class="footer draggable" cdkDrag>
   <button
     class="nav-btn"
     [ngClass]="{ 'active': isWishlist }"
@@ -211,9 +283,9 @@
   >
     <div class="icon-wrapper">
       <img src="../../assets/heart-solid-full.svg" class="profile-icon" />
+    <span class="badge">{{ wishlist.length }}</span>
     </div>
     <span class="nav-label">Wishlist</span>
-    <span class="badge">{{ wishlist.length }}</span>
   </button>
 
   <!-- Home -->
@@ -254,6 +326,7 @@
     </div>
     <span class="nav-label">Cart</span>
   </button>
+  </div>
 
   <!-- <button class="nav-btn" onclick="setActive(this)">
         <div class="icon-wrapper">
@@ -268,19 +341,19 @@
 <div class="side-panel" [class.open]="isPanelOpen">
   <div class="panel-header">
     <div class="panel-head" *ngIf="isCart">
-      <button class="close-btn" (click)="setActive('Home');togglePanel(); ">
+      <button class="close-btn" (click)="goBack()">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
       <h4 style="margin: 0px 0px 0px 10px">Items in Cart</h4>
     </div>
     <div class="panel-head" *ngIf="isWishlist">
-      <button class="close-btn" (click)="setActive('Home');togglePanel(); ;">
+      <button class="close-btn" (click)="goBack()">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
       <h4 style="margin: 0px 0px 0px 10px">Items you Liked</h4>
     </div>
     <div class="panel-head" *ngIf="isProfile">
-      <button class="close-btn" (click)="setActive('Home');togglePanel();">
+      <button class="close-btn" (click)="goBack()">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
       <h4 style="margin: 0px 0px 0px 10px" *ngIf="!paymentModeUI">
@@ -596,7 +669,7 @@
       <div class="list-settings" *ngIf="!paymentModeUI">
         <div class="list-item" (click)="openOrderHistory()">
           <span class="blackTxt">My Orders</span>
-          <i class="fa-solid fa-chevron-right"></i>
+          <i class="fa-solid fa-chevron-right myOrderColor"></i>
         </div>
 
         <div class="list-item logout" (click)="logout()">
@@ -618,7 +691,7 @@
       <div class="paymode-container">
         <div
           class="paymode-card"
-          [class.selected]="selectedMode === 'upi'"
+          [class.selected]="paymentMode === 'upi'"
           (click)="selectMode('upi')"
         >
           <i class="fas fa-credit-card"></i>
@@ -627,7 +700,7 @@
 
         <div
           class="paymode-card"
-          [class.selected]="selectedMode === 'cash'"
+          [class.selected]="paymentMode === 'cash'"
           (click)="selectMode('cash')"
         >
           <i class="fas fa-money-bill-wave"></i>
@@ -805,5 +878,24 @@
 </div>
 
 <div class="loader-overlay" *ngIf="isLoading">
-  <ion-spinner name="crescent"></ion-spinner>
+  <div class="preloader">
+	<svg class="cart" role="img" aria-label="Shopping cart line animation" viewBox="0 0 128 128" width="128px" height="128px" xmlns="http://www.w3.org/2000/svg">
+		<g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="8">
+			<g class="cart__track" stroke="hsla(0,10%,10%,0.1)">
+				<polyline points="4,4 21,4 26,22 124,22 112,64 35,64 39,80 106,80" />
+				<circle cx="43" cy="111" r="13" />
+				<circle cx="102" cy="111" r="13" />
+			</g>
+			<g class="cart__lines" stroke="currentColor">
+				<polyline class="cart__top" points="4,4 21,4 26,22 124,22 112,64 35,64 39,80 106,80" stroke-dasharray="338 338" stroke-dashoffset="-338" />
+				<g class="cart__wheel1" transform="rotate(-90,43,111)">
+					<circle class="cart__wheel-stroke" cx="43" cy="111" r="13" stroke-dasharray="81.68 81.68" stroke-dashoffset="81.68" />
+				</g>
+				<g class="cart__wheel2" transform="rotate(90,102,111)">
+					<circle class="cart__wheel-stroke" cx="102" cy="111" r="13" stroke-dasharray="81.68 81.68" stroke-dashoffset="81.68" />
+				</g>
+			</g>
+		</g>
+	</svg>
+</div>
 </div>

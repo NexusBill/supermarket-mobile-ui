@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild, TemplateRef, NgZone, ChangeDetectorRef } from '@angular/core';
+import { Component, ViewChild, TemplateRef, NgZone, ChangeDetectorRef,HostListener } from '@angular/core';
 import { ModalController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { StatusBar } from '@capacitor/status-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -48,6 +49,28 @@ interface Product {
   isImageUploaded:boolean;
 }
 
+interface filtteredProducs {
+  id?: string;
+  // core product fields
+  name: string;
+  Category?: string;
+  QuantityOnHand?: number;
+  UnitDesc?: string;
+  RetailPrice?: number;
+  SalePrice?: number;
+  MRP?: number;
+  UnitPrice?: number;
+  EANCode?: string;
+  weight?: string;
+  price: number;
+  image?: string;
+  quantity?: number;
+  isAdded: boolean;
+  isLiked: boolean;
+  imageName:string;
+  isImageUploaded:boolean;
+}
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
@@ -68,9 +91,15 @@ export class HomePage {
   @ViewChild('loginSheet') loginSheet!: TemplateRef<any>;
   @ViewChild(IonModal) modal!: IonModal;
 
+@HostListener('document:ionBackButton', ['$event'])
+handleBackButton(event: any) {
+  event.detail.register(1000, () => {
+    this.goBack();
+  });
+}
 
 
-paymentMode: string = '';
+paymentMode: string = 'upi';
   searchText = '';
   latitude: number | null = null;
   longitude: number | null = null;
@@ -172,16 +201,32 @@ onProductScroll(event: any) {
     this.getProducts();
   }
 }
+
+filteredProductsList: filtteredProducs[] = [];
 getSearchedProducts(query: string) {
+  debugger
+  if(query.trim()===''){
+    this.showCustomToast('Please enter a search term','warning');
+  }else{
+  this.isLoading=true;
+  this.searchText = query;
   this.http
     .get<any>(
       `https://supermartspring.vercel.app/api/nexus_supermart/products/search?query=${query}`
     )
     .subscribe(res => {
       this.filteredSuggestions = res.data || [];
+      this.filteredProductsList = res;
+       this.isLoading=false;
     });
+    }
 }
 
+clearSearch(){
+  this.searchText='';
+  this.filteredSuggestions=[];
+  this.filteredProductsList=[];
+}
 
 getProducts() {
   if (this.loadingMore || this.allLoaded) return;
@@ -191,7 +236,7 @@ getProducts() {
     this.isLoading = true;
   }
 
-  this.loadingMore = true;
+  this.isLoading = true;
 
   this.http
     .get<any>(
@@ -204,6 +249,7 @@ getProducts() {
         } else {
           this.products = [...this.products, ...res.data];
           this.page++;
+          this.isLoading = false;
         }
       },
       error: (err: any) => {
@@ -257,6 +303,31 @@ offsetY = 0;
     footer.style.bottom = 'auto';
   }
 
+goBack() {
+
+  if (this.isOrderHistory) {
+    this.isOrderHistory = false;
+    this.isProfile = true;
+    return;
+  }
+
+  if (this.paymentModeUI) {
+    this.paymentModeUI = false;
+    return;
+  }
+
+  if (this.isPanelOpen) {
+    this.isPanelOpen = false;
+    this.isCart = false;
+    this.isWishlist = false;
+    this.isProfile = false;
+    return;
+  }
+
+}
+
+
+
   openOrderHistory() {
   this.isOrderHistory = true;
   this.isCart = false;
@@ -272,8 +343,7 @@ closeOrderHistory() {
 }
 
 loadOrders() {
-  this.isLoading = true;
-
+debugger
   this.supermartService.getOrders(1234).subscribe({
     next: (res: any) => {
       this.orders = res;
@@ -306,6 +376,7 @@ logout() {
   this.showCustomToast("Logged out",'success');
   this.isProfile = false;
   this.togglePanel();
+  setTimeout(() => this.openLogin(), 100);
 }
 
 
@@ -333,9 +404,12 @@ logout() {
    * - this.totalPrice should be in INR (number). We convert to paise.
    */
   async pay() {
+    debugger
+    this.isLoading = true;
     const amountInPaise = Math.round(this.totalPrice * 100);
 
   if (amountInPaise <= 0) {
+     this.isLoading = false;
      this.showCustomToast('Cart is empty!','danger');
     return;
   }
@@ -357,7 +431,7 @@ logout() {
         },
         handler: (response: any) => {
           console.log("Payment Success:", response);
-
+           this.isLoading = false;
           // 2️⃣ VERIFY PAYMENT AFTER SUCCESS
           this.verifyPayment(response);
         },
@@ -374,6 +448,7 @@ logout() {
       const rzp = new (window as any).Razorpay(options);
 
     rzp.on("payment.failed", (err: any) => {
+      this.isLoading = false;
       this.showCustomToast('Payment Failed! Please try again.','danger');
       console.error(err);
     });
@@ -382,7 +457,8 @@ logout() {
     });
   }
 verifyPayment(response: any) {
-
+debugger
+ this.isLoading = true;
   // STEP 1: Verify Razorpay payment
   this.http.post("https://supermartspring.vercel.app/verify-payment", {
     razorpay_order_id: response.razorpay_order_id,
@@ -425,22 +501,26 @@ verifyPayment(response: any) {
         this.supermartService.placeOrder(payload).subscribe({
           next: () => {
             this.showCustomToast("Order placed successfully! 🛒", "success");
+            this.isLoading = false;
             this.clearCart();
             this.isPanelOpen = false;
             this.loadOrders();
           },
           error: () => {
+             this.isLoading = false;
             this.showCustomToast('Failed to place order ❌', 'danger');
           }
         });
 
       } else {
+         this.isLoading = false;
         this.showCustomToast('Payment verification failed ❌', 'danger');
       }
     },
 
     error: (err) => {
       console.error(err);
+       this.isLoading = false;
       this.showCustomToast('Payment verification failed ❌', 'danger');
     }
   });
@@ -479,21 +559,17 @@ verifyPayment(response: any) {
   // }
 
 // const paymodeCards: NodeListOf<HTMLElement> = document.querySelectorAll('.paymode-card');
-selectedMode: 'upi' | 'cash' = 'upi'; 
+
  selectMode(mode: 'upi' | 'cash') {
-    this.selectedMode = mode;
-    this.paymentMode = this.selectedMode;
+    this.paymentMode = mode;
   }
 
 userDetails: any = {};
   ngOnInit() {
-    
+    StatusBar.setOverlaysWebView({ overlay: false });
     setTimeout(() => this.openLogin(), 300);
-
     this.resetStates();
-    this.getProducts();
     this.getLocation();
-    this.getCategories();
     this.isHome = true;
     this.userName = localStorage.getItem("userName") || '';
     this.email = localStorage.getItem("emai") || '';
@@ -534,67 +610,90 @@ userDetails: any = {};
 
 }
 
-orderForUPI: any = null;  // Add this in class
+orderForUPI: any = null;  
 
 saveUserData() {
-  if (this.userName && this.email && this.address && this.phoneNumber && this.paymentMode) {
+  debugger
+  const requiredFields: { key: string; value: any; label: string }[] = [
+    { key: 'userName', value: this.userName, label: 'User Name' },
+    { key: 'email', value: this.email, label: 'Email' },
+    { key: 'address', value: this.address, label: 'Address' },
+    { key: 'phoneNumber', value: this.phoneNumber, label: 'Phone Number' },
+    { key: 'paymentMode', value: this.paymentMode, label: 'Payment Mode' }
+  ];
 
-    localStorage.setItem("userName", this.userName);
-    localStorage.setItem("email", this.email);
-    localStorage.setItem("address", this.address);
-    localStorage.setItem("phoneNumber", this.phoneNumber);
+  const missingFields = requiredFields
+    .filter(field => field.value === null || field.value === undefined || field.value === '')
+    .map(field => field.label);
 
-    const user = JSON.parse(localStorage.getItem('supermart_user') || '{}');
-    const customerId = user?.customerId || user?.id || '';
+  if (missingFields.length > 0) {
+    this.showCustomToast(
+      `Please fill the following fields: ${missingFields.join(', ')}`,
+      'danger'
+    );
+    return;
+  }
 
-    const payload = {
-      customerId: customerId,
-      customer: this.userName,
-      mobile: this.phoneNumber,
-      amount: this.totalPrice,
-      discount: 0,
-      savings: 0,
-      date: new Date().toISOString(),
-      amountPaid: this.paymentMode === 'cash' ? this.totalPrice : 0,
-      paymentMode: this.paymentMode,
-      orderBy: "in-person",
-      deliveryAddress: this.address,
-      products: this.selectedProduct.map((p: any) => ({
-        productId: p.id,
-        name: p.name,
-        price: p.price,
-        qty: p.quantity || 1,
-        total: (p.quantity || 1) * p.price
-      }))
-    };
+  this.isLoading = true;
 
-    if (this.paymentMode === 'cash') {
-      this.submitOrderToBackend(payload);
-      return;
-    }
+  localStorage.setItem("userName", this.userName);
+  localStorage.setItem("email", this.email);
+  localStorage.setItem("address", this.address);
+  localStorage.setItem("phoneNumber", this.phoneNumber);
 
-    if (this.paymentMode === 'upi') {
-      this.orderForUPI = payload;
-      this.pay();
-      return;
-    }
-  } 
-  else {
-    this.showCustomToast('Please fill all required fields', 'danger');
+  const user = JSON.parse(localStorage.getItem('supermart_user') || '{}');
+  const customerId = user?.customerId || user?.id || '';
+
+  const payload = {
+    customerId,
+    customer: this.userName,
+    mobile: this.phoneNumber,
+    amount: this.totalPrice,
+    discount: 0,
+    savings: 0,
+    date: new Date().toISOString(),
+    amountPaid: this.paymentMode === 'cash' ? this.totalPrice : 0,
+    paymentMode: this.paymentMode,
+    orderBy: "in-person",
+    deliveryAddress: this.address,
+    products: this.selectedProduct.map((p: any) => ({
+      productId: p.id,
+      name: p.name,
+      price: p.price,
+      qty: p.quantity || 1,
+      total: (p.quantity || 1) * p.price
+    }))
+  };
+
+  if (this.paymentMode === 'cash') {
+    this.submitOrderToBackend(payload);
+    this.isLoading = false;
+    return;
+  }
+
+  if (this.paymentMode === 'upi') {
+    this.orderForUPI = payload;
+    this.pay();
+    this.isLoading = false;
+    return;
   }
 }
 
+
 submitOrderToBackend(payload: any) {
+  debugger
   this.isLoading = true;
 
   this.supermartService.placeOrder(payload).subscribe({
     next: () => {
+      this.isLoading = false;
       this.showCustomToast('Order placed successfully! ✅', 'success');
       this.clearCart();
       this.isPanelOpen = false;
       this.loadOrders();
     },
     error: () => {
+      this.isLoading = false;
       this.showCustomToast('Failed to place order ❌', 'danger');
     },
     complete: () => {
@@ -677,6 +776,7 @@ this.http.post(
 
   }
   clearCart() {
+    debugger
     this.selectedProduct.forEach(item => {
       item.isAdded = false;
       item.quantity = 0;
@@ -779,7 +879,8 @@ getCategories() {
 
     if (value === '') {
       this.filteredSuggestions = [];
-      this.products = [...this.productsBackup];
+      this.filteredProductsList = [];
+      this.products = [...this.products];
     } else {
       this.filteredSuggestions = this.products.filter(p =>
     p.Category?.toLowerCase().includes(value.toLowerCase()) || p.name?.toLowerCase().includes(value.toLowerCase())
@@ -794,6 +895,7 @@ getCategories() {
 productsBackup: Product[] = [];
 selectSuggestion(suggestion: string) {
   debugger;
+  this.searchText = suggestion;
   this.filteredSuggestions = [];
   if(this.productsBackup.length===0){
     this.productsBackup = [...this.products];
@@ -805,6 +907,7 @@ selectSuggestion(suggestion: string) {
     p.name?.toLowerCase().includes(suggestion.toLowerCase())
   );
 }
+
 constructor(private http: HttpClient,private supermartService: SupermartService,private modalCtrl: ModalController, private zone: NgZone,private toastCtrl: ToastController,    private cdr: ChangeDetectorRef) {}
 // async getLocation() {
 //   this.errorMsg = null;
@@ -1015,7 +1118,7 @@ switchToLogin() {
 }
 
 skipLogin() {
-  this.isModalOpen = false;
+  this.closeModal();
   this.showCustomToast('Login skipped','warning');
 }
 
@@ -1032,11 +1135,13 @@ login() {
     password: this.loginData.password
   }).subscribe({
     next: (res: any) => {
+       this.isLoading = false;
       this.showCustomToast("Login success", 'success');
       localStorage.setItem("supermart_user", JSON.stringify(res));
       this.closeModal();
     },
     error: () => {
+       this.isLoading = false;
       this.showCustomToast("Invalid login", 'danger');
     },
     complete: () => {
@@ -1048,6 +1153,8 @@ login() {
 
 closeModal() {
   this.isModalOpen = false;
+  this.getCategories();
+  this.getProducts();
 }
 
 

@@ -118,6 +118,13 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
+ion-app {
+  --ion-safe-area-bottom: 0px !important;
+      height: 95% !important;
+    overflow: auto !important;
+}
+
+
 /* Animation */
 .toast-show {
   opacity: 1 !important;
