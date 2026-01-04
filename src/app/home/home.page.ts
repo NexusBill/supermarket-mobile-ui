@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild, TemplateRef, NgZone, ChangeDetectorRef,HostListener } from '@angular/core';
+import { Component, ViewChild,ElementRef, TemplateRef, NgZone, ChangeDetectorRef,HostListener } from '@angular/core';
 import { ModalController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule,IonContent } from '@ionic/angular';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { StatusBar } from '@capacitor/status-bar';
 import { MatIconModule } from '@angular/material/icon';
@@ -90,6 +90,7 @@ export class HomePage {
 
   @ViewChild('loginSheet') loginSheet!: TemplateRef<any>;
   @ViewChild(IonModal) modal!: IonModal;
+  @ViewChild('contentScroll') contentScroll!: ElementRef<HTMLDivElement>;
 
 @HostListener('document:ionBackButton', ['$event'])
 handleBackButton(event: any) {
@@ -223,6 +224,18 @@ getSearchedProducts(query: string) {
        this.loaderText = 'Loading... Please wait.';
     });
     }
+   setTimeout(() => {
+   this.scrollToTop();
+  }, 0);
+}
+
+scrollToTop() {
+ if (this.contentScroll) {
+    this.contentScroll.nativeElement.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }
 }
 
 clearSearch(){
@@ -920,6 +933,10 @@ selectSuggestion(suggestion: string) {
     p.Category?.toLowerCase().includes(suggestion.toLowerCase()) ||
     p.name?.toLowerCase().includes(suggestion.toLowerCase())
   );
+  setTimeout(() => {
+   this.scrollToTop();
+  }, 0);
+  
 }
 
 constructor(private http: HttpClient,private supermartService: SupermartService,private modalCtrl: ModalController, private zone: NgZone,private toastCtrl: ToastController,    private cdr: ChangeDetectorRef) {}
