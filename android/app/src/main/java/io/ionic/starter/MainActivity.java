@@ -1,4 +1,4 @@
-package io.ionic.starter;
+package com.kaviyarasan.kamatchisupermarket;
 
 import android.os.Bundle;
 import com.getcapacitor.BridgeActivity;
